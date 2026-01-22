@@ -77,6 +77,13 @@ class PetService extends BaseService {
   async deletePet(id: string): Promise<void> {
     await this.delete(`/${id}`)
   }
+
+  async uploadPhoto(id: string, file: File): Promise<PetPhoto> {
+    const formData = new FormData()
+    formData.append('foto', file)
+
+    return this.post<PetPhoto>(`/${id}/fotos`, formData)
+  }
 }
 
 export const petService = new PetService()

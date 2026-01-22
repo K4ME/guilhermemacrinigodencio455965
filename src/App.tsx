@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { PetList } from './components/PetList'
 import { PetDetail } from './pages/PetDetail'
+import { PetFormPage } from './pages/PetFormPage'
 import { useAuth } from './contexts/AuthContext'
 
 const App = () => {
@@ -35,7 +36,9 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Navigate to="/pets" replace />} />
             <Route path="/pets" element={<PetList />} />
+            <Route path="/pets/new" element={<PetFormPage />} />
             <Route path="/pets/:id" element={<PetDetail />} />
+            <Route path="/pets/:id/edit" element={<PetFormPage />} />
           </Routes>
         </main>
       </div>

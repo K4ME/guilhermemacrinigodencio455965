@@ -42,6 +42,11 @@ class HttpClient {
           }
         }
 
+        // Se for FormData, remover Content-Type para o navegador definir o boundary
+        if (config.data instanceof FormData && config.headers) {
+          delete config.headers['Content-Type']
+        }
+
         // Log de requisições em desenvolvimento
         if (import.meta.env.DEV) {
           console.log(`[HTTP Request] ${config.method?.toUpperCase()} ${config.url}`, {

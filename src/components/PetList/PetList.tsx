@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { petService, PetPaginatedResponse } from '../../services/api'
 import { PetCard } from '../PetCard'
 import { Pagination } from '../Pagination'
@@ -7,6 +8,7 @@ import { handleApiError } from '../../utils/errorHandler'
 import { ApiError } from '../../types/api.types'
 
 const PetList = () => {
+  const navigate = useNavigate()
   const [page, setPage] = useState(0)
   const [size] = useState(10)
   const [data, setData] = useState<PetPaginatedResponse | null>(null)
@@ -104,13 +106,21 @@ const PetList = () => {
   return (
     <>
       <div className="mb-6">
-        <div className="mb-4">
-          <SearchInput
-            value={searchTerm}
-            onChange={handleSearchChange}
-            placeholder="Buscar por nome do pet..."
-            onClear={handleClearSearch}
-          />
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+          <div className="flex-1">
+            <SearchInput
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder="Buscar por nome do pet..."
+              onClear={handleClearSearch}
+            />
+          </div>
+          <button
+            onClick={() => navigate('/pets/new')}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap"
+          >
+            + Novo Pet
+          </button>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           {searchTerm.trim() ? (
