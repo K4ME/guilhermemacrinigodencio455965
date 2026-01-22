@@ -119,11 +119,11 @@ const PetFormPage = () => {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           {isEditMode ? 'Editar Pet' : 'Novo Pet'}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          {isEditMode
-            ? 'Atualize as informações do pet'
-            : 'Preencha os dados para cadastrar um novo pet'}
-        </p>
+        {!isEditMode && (
+          <p className="text-gray-600 dark:text-gray-400">
+            Preencha os dados para cadastrar um novo pet
+          </p>
+        )}
       </div>
 
       {error && !isEditMode && (

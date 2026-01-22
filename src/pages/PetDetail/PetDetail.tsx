@@ -125,49 +125,73 @@ const PetDetail = () => {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-        {/* Foto do Pet */}
-        {pet.foto?.url && (
-          <div className="w-full h-96 bg-gray-200 dark:bg-gray-700 overflow-hidden">
-            <img
-              src={pet.foto.url}
-              alt={pet.nome}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement
-                target.style.display = 'none'
-              }}
-            />
-          </div>
-        )}
-
         <div className="p-8">
-          {/* Nome do Pet com Destaque */}
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6 border-b-4 border-blue-600 pb-4">
-            {pet.nome}
-          </h1>
+          {/* Layout: Foto à esquerda, Informações à direita */}
+          <div className="flex flex-col md:flex-row gap-8 mb-8">
+            {/* Foto do Pet - Lateral Esquerda */}
+            <div className="flex-shrink-0">
+              {pet.foto?.url ? (
+                <div className="w-48 h-48 md:w-56 md:h-56 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden flex items-center justify-center">
+                  <img
+                    src={pet.foto.url}
+                    alt={pet.nome}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="w-48 h-48 md:w-56 md:h-56 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                  <svg
+                    className="w-16 h-16 text-gray-400 dark:text-gray-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+              )}
+            </div>
 
-          {/* Informações do Pet */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
-              Informações do Pet
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Raça</p>
-                <p className="text-lg font-medium text-gray-900 dark:text-white">
-                  {pet.raca || 'Não informado'}
-                </p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Idade</p>
-                <p className="text-lg font-medium text-gray-900 dark:text-white">
-                  {ageText}
-                </p>
+            {/* Informações do Pet - Lateral Direita */}
+            <div className="flex-1">
+              {/* Nome do Pet com Destaque */}
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6 border-b-4 border-blue-600 pb-4">
+                {pet.nome}
+              </h1>
+
+              {/* Informações do Pet */}
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                  Informações do Pet
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Raça</p>
+                    <p className="text-lg font-medium text-gray-900 dark:text-white">
+                      {pet.raca || 'Não informado'}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Idade</p>
+                    <p className="text-lg font-medium text-gray-900 dark:text-white">
+                      {ageText}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Informações dos Tutores */}
+          {/* Informações dos Tutores - Embaixo */}
           {pet.tutores && pet.tutores.length > 0 && (
             <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">

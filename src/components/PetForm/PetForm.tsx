@@ -136,105 +136,11 @@ const PetForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label
-          htmlFor="nome"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-        >
-          Nome <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          id="nome"
-          value={formData.nome}
-          onChange={(e) => handleChange('nome', e.target.value)}
-          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-            errors.nome
-              ? 'border-red-500 dark:border-red-500'
-              : 'border-gray-300 dark:border-gray-600'
-          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-          placeholder="Digite o nome do pet"
-          disabled={isLoading}
-        />
-        {errors.nome && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.nome}</p>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="raca"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-        >
-          Raça <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          id="raca"
-          value={formData.raca}
-          onChange={(e) => handleChange('raca', e.target.value)}
-          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-            errors.raca
-              ? 'border-red-500 dark:border-red-500'
-              : 'border-gray-300 dark:border-gray-600'
-          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-          placeholder="Digite a raça do pet"
-          disabled={isLoading}
-        />
-        {errors.raca && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.raca}</p>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="idade"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-        >
-          Idade <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="number"
-          id="idade"
-          min="0"
-          max="50"
-          value={formData.idade}
-          onChange={(e) => handleChange('idade', parseInt(e.target.value) || 0)}
-          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-            errors.idade
-              ? 'border-red-500 dark:border-red-500'
-              : 'border-gray-300 dark:border-gray-600'
-          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-          placeholder="Digite a idade do pet"
-          disabled={isLoading}
-        />
-        {errors.idade && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.idade}</p>
-        )}
-      </div>
-
-      {/* Upload de Foto - apenas no modo de edição */}
-      {pet && onPhotoUpload && (
-        <div>
-          <label
-            htmlFor="foto"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
-            Foto
-          </label>
-          {photoPreview && (
-            <div className="mb-4">
-              <img
-                src={photoPreview}
-                alt="Preview"
-                className="w-32 h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-                onError={() => {
-                  setPhotoError('Não foi possível carregar a imagem')
-                }}
-              />
-            </div>
-          )}
-          <div className="flex gap-2">
+      {/* Layout: Foto à esquerda, Campos à direita - apenas no modo de edição */}
+      {pet && onPhotoUpload ? (
+        <div className="flex flex-col md:flex-row gap-8 items-start">
+          {/* Foto à esquerda */}
+          <div className="flex-shrink-0 md:self-stretch">
             <input
               type="file"
               id="foto"
@@ -243,30 +149,234 @@ const PetForm = ({
               className="hidden"
               disabled={isLoading || isUploadingPhoto}
             />
-            <label
-              htmlFor="foto"
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer transition-colors text-center disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {selectedFile ? selectedFile.name : 'Selecionar foto'}
-            </label>
-            {selectedFile && (
-              <button
-                type="button"
-                onClick={handlePhotoUpload}
-                disabled={isLoading || isUploadingPhoto || !!photoError}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            <div className="flex flex-col items-center gap-4 h-full md:justify-start">
+              <label
+                htmlFor="foto"
+                className="relative cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed h-full flex items-center"
               >
-                {isUploadingPhoto ? 'Enviando...' : 'Enviar Foto'}
-              </button>
+                {photoPreview ? (
+                  <div className="relative h-full">
+                    <img
+                      src={photoPreview}
+                      alt="Preview"
+                      className="w-48 h-full min-h-[280px] object-contain rounded-lg border-2 border-gray-300 dark:border-gray-600 group-hover:border-blue-500 transition-colors"
+                      onError={() => {
+                        setPhotoError('Não foi possível carregar a imagem')
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all flex flex-col items-center justify-center gap-2">
+                      <span className="text-white opacity-0 group-hover:opacity-100 font-medium text-sm">
+                        Clique para trocar
+                      </span>
+                      <span className="text-white opacity-0 group-hover:opacity-100 text-xs">
+                        JPG, PNG, GIF. Máx: 5MB
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-48 h-full min-h-[280px] bg-gray-200 dark:bg-gray-700 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 group-hover:border-blue-500 transition-colors flex items-center justify-center">
+                    <div className="text-center">
+                      <svg
+                        className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Clique para selecionar
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </label>
+              {selectedFile && (
+                <div className="flex flex-col items-center gap-2 w-full">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    {selectedFile.name}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handlePhotoUpload}
+                    disabled={isLoading || isUploadingPhoto || !!photoError}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isUploadingPhoto ? 'Enviando...' : 'Enviar Foto'}
+                  </button>
+                </div>
+              )}
+              {photoError && (
+                <p className="text-sm text-red-600 dark:text-red-400 text-center">{photoError}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Campos à direita */}
+          <div className="flex-1 space-y-6 w-full md:self-stretch">
+            <div>
+              <label
+                htmlFor="nome"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Nome <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="nome"
+                value={formData.nome}
+                onChange={(e) => handleChange('nome', e.target.value)}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                  errors.nome
+                    ? 'border-red-500 dark:border-red-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                placeholder="Digite o nome do pet"
+                disabled={isLoading}
+              />
+              {errors.nome && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.nome}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="raca"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Raça <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="raca"
+                value={formData.raca}
+                onChange={(e) => handleChange('raca', e.target.value)}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                  errors.raca
+                    ? 'border-red-500 dark:border-red-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                placeholder="Digite a raça do pet"
+                disabled={isLoading}
+              />
+              {errors.raca && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.raca}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="idade"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Idade <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                id="idade"
+                min="0"
+                max="50"
+                value={formData.idade}
+                onChange={(e) => handleChange('idade', parseInt(e.target.value) || 0)}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                  errors.idade
+                    ? 'border-red-500 dark:border-red-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                placeholder="Digite a idade do pet"
+                disabled={isLoading}
+              />
+              {errors.idade && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.idade}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Campos normais quando não está em modo de edição */
+        <>
+          <div>
+            <label
+              htmlFor="nome"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Nome <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="nome"
+              value={formData.nome}
+              onChange={(e) => handleChange('nome', e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                errors.nome
+                  ? 'border-red-500 dark:border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+              } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+              placeholder="Digite o nome do pet"
+              disabled={isLoading}
+            />
+            {errors.nome && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.nome}</p>
             )}
           </div>
-          {photoError && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{photoError}</p>
-          )}
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 5MB
-          </p>
-        </div>
+
+          <div>
+            <label
+              htmlFor="raca"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Raça <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="raca"
+              value={formData.raca}
+              onChange={(e) => handleChange('raca', e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                errors.raca
+                  ? 'border-red-500 dark:border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+              } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+              placeholder="Digite a raça do pet"
+              disabled={isLoading}
+            />
+            {errors.raca && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.raca}</p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="idade"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Idade <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              id="idade"
+              min="0"
+              max="50"
+              value={formData.idade}
+              onChange={(e) => handleChange('idade', parseInt(e.target.value) || 0)}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                errors.idade
+                  ? 'border-red-500 dark:border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+              } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+              placeholder="Digite a idade do pet"
+              disabled={isLoading}
+            />
+            {errors.idade && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.idade}</p>
+            )}
+          </div>
+        </>
       )}
 
       <div className="flex gap-4 pt-4">
