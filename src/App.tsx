@@ -1,30 +1,36 @@
-import { useState } from 'react'
+import { PetList } from './components/PetList'
+import { useAuth } from './contexts/AuthContext'
 
 const App = () => {
-  const [count, setCount] = useState(0)
+  const { isLoading } = useAuth()
 
-  const handleClick = () => {
-    setCount((count) => count + 1)
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Autenticando...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 dark:bg-gray-100">
-      <div className="max-w-4xl mx-auto px-8 py-16 text-center">
-        <div className="p-8 bg-gray-800 dark:bg-white rounded-lg shadow-lg">
-          <h1 className="text-5xl font-bold mb-8 text-white dark:text-gray-900">
-            React + TypeScript + Vite
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <header className="bg-white dark:bg-gray-800 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Pet Manager
           </h1>
-          <button
-            onClick={handleClick}
-            className="rounded-lg border border-transparent px-5 py-3 text-base font-medium bg-gray-700 dark:bg-gray-100 text-white dark:text-gray-900 cursor-pointer transition-all duration-250 hover:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50"
-          >
-            Contador é {count}
-          </button>
-          <p className="mt-6 text-gray-300 dark:text-gray-700">
-            Edite <code className="bg-gray-700 dark:bg-gray-100 px-2 py-1 rounded text-sm">src/App.tsx</code> e salve para testar o HMR
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+            Gerencie seus pets de forma simples e eficiente
           </p>
         </div>
-      </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <PetList />
+      </main>
     </div>
   )
 }

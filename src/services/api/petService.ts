@@ -1,32 +1,48 @@
 import { BaseService } from '../http/baseService'
 
-// Exemplo de tipos - ajustar conforme a API real
+export interface PetPhoto {
+  id: number
+  nome: string
+  contentType: string
+  url: string
+}
+
 export interface Pet {
-  id: string
-  name: string
-  species?: string
-  breed?: string
-  age?: number
-  createdAt?: string
-  updatedAt?: string
+  id: number
+  nome: string
+  raca: string
+  idade: number
+  foto: PetPhoto | null
+}
+
+export interface PetPaginatedResponse {
+  page: number
+  size: number
+  total: number
+  pageCount: number
+  content: Pet[]
 }
 
 export interface CreatePetDto {
-  name: string
-  species?: string
-  breed?: string
-  age?: number
+  nome: string
+  raca: string
+  idade: number
 }
 
 export interface UpdatePetDto extends Partial<CreatePetDto> {}
 
 class PetService extends BaseService {
   constructor() {
-    super('/pets') // Ajustar conforme o endpoint real da API
+    super('/v1/pets')
   }
 
-  async getAll(): Promise<Pet[]> {
-    return this.get<Pet[]>()
+  async getAll(page: number = 0, size: number = 10): Promise<PetPaginatedResponse> {
+    return this.get<PetPaginatedResponse>('', {
+      params: {
+        page,
+        size,
+      },
+    })
   }
 
   async getById(id: string): Promise<Pet> {

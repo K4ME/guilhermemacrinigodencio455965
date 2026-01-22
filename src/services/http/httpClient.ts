@@ -21,10 +21,15 @@ class HttpClient {
     // Request interceptor
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        // Adicionar token de autenticação se existir
-        const token = this.getAuthToken()
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`
+        // Não adicionar token para endpoints de autenticação
+        const isAuthEndpoint = config.url?.includes('/autenticacao')
+        
+        if (!isAuthEndpoint) {
+          // Adicionar token de autenticação se existir
+          const token = this.getAuthToken()
+          if (token && config.headers) {
+            config.headers.Authorization = `Bearer ${token}`
+          }
         }
 
         // Log de requisições em desenvolvimento
@@ -56,6 +61,18 @@ class HttpClient {
         return response
       },
       (error: AxiosError) => {
+        // Tratar erro 401 (não autorizado) - token expirado ou inválido
+        if (error.response?.status === 401) {
+          const isAuthEndpoint = error.config?.url?.includes('/autenticacao')
+          
+          // Se não for endpoint de autenticação, limpar token e tentar reautenticar
+          if (!isAuthEndpoint) {
+            this.removeAuthToken()
+            // Disparar evento para o contexto de autenticação reautenticar
+            window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+          }
+        }
+
         const apiError = this.handleError(error)
         
         if (import.meta.env.DEV) {
