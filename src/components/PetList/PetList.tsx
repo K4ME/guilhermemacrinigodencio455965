@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { petService, PetPaginatedResponse } from '../../services/api'
 import { PetCard } from '../PetCard'
 import { Pagination } from '../Pagination'
+import { SearchInput } from '../SearchInput'
 import { handleApiError } from '../../utils/errorHandler'
 import { ApiError } from '../../types/api.types'
 
@@ -11,13 +12,14 @@ const PetList = () => {
   const [data, setData] = useState<PetPaginatedResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<ApiError | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
-  const fetchPets = async (currentPage: number) => {
+  const fetchPets = async (currentPage: number, searchName?: string) => {
     setLoading(true)
     setError(null)
 
     try {
-      const response = await petService.getAll(currentPage, size)
+      const response = await petService.getAll(currentPage, size, searchName)
       setData(response)
     } catch (err) {
       setError(err as ApiError)
@@ -27,13 +29,27 @@ const PetList = () => {
   }
 
   useEffect(() => {
-    fetchPets(page)
-  }, [page])
+    fetchPets(page, searchTerm.trim() || undefined)
+  }, [page, searchTerm])
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    // Resetar para primeira página quando buscar
+    setPage(0)
+  }
+
+  const handleClearSearch = () => {
+    setSearchTerm('')
+    setPage(0)
+  }
+
+  // Usar os pets diretamente da resposta da API (busca server-side)
+  const displayedPets = data?.content || []
 
   if (loading && !data) {
     return (
@@ -57,7 +73,7 @@ const PetList = () => {
             {handleApiError(error)}
           </p>
           <button
-            onClick={() => fetchPets(page)}
+            onClick={() => fetchPets(page, searchTerm.trim() || undefined)}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
           >
             Tentar novamente
@@ -82,25 +98,82 @@ const PetList = () => {
     )
   }
 
+  const hasSearchResults = displayedPets.length > 0
+  const showNoResults = searchTerm.trim() && !hasSearchResults && !loading
+
   return (
     <>
       <div className="mb-6">
+        <div className="mb-4">
+          <SearchInput
+            value={searchTerm}
+            onChange={handleSearchChange}
+            placeholder="Buscar por nome do pet..."
+            onClear={handleClearSearch}
+          />
+        </div>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Mostrando {data.content.length} de {data.total} pets
+          {searchTerm.trim() ? (
+            <>
+              {hasSearchResults ? (
+                <>
+                  Mostrando {displayedPets.length} resultado{displayedPets.length !== 1 ? 's' : ''} para &quot;{searchTerm}&quot;
+                  {data && data.total > displayedPets.length && (
+                    <> de {data.total} total</>
+                  )}
+                </>
+              ) : (
+                <>
+                  Nenhum resultado encontrado para &quot;{searchTerm}&quot;
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              {data && (
+                <>
+                  Mostrando {data.content.length} de {data.total} pets
+                </>
+              )}
+            </>
+          )}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {data.content.map((pet) => (
-          <PetCard key={pet.id} pet={pet} />
-        ))}
-      </div>
+      {showNoResults ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2">
+              Nenhum pet encontrado
+            </p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+              Não há pets com o nome &quot;{searchTerm}&quot;.
+            </p>
+            <button
+              onClick={handleClearSearch}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Limpar busca
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {displayedPets.map((pet) => (
+              <PetCard key={pet.id} pet={pet} />
+            ))}
+          </div>
 
-      <Pagination
-        currentPage={data.page}
-        totalPages={data.pageCount}
-        onPageChange={handlePageChange}
-      />
+          {data && data.pageCount > 1 && (
+            <Pagination
+              currentPage={data.page}
+              totalPages={data.pageCount}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </>
+      )}
     </>
   )
 }

@@ -36,12 +36,18 @@ class PetService extends BaseService {
     super('/v1/pets')
   }
 
-  async getAll(page: number = 0, size: number = 10): Promise<PetPaginatedResponse> {
+  async getAll(page: number = 0, size: number = 10, nome?: string): Promise<PetPaginatedResponse> {
+    const params: Record<string, unknown> = {
+      page,
+      size,
+    }
+
+    if (nome && nome.trim()) {
+      params.nome = nome.trim()
+    }
+
     return this.get<PetPaginatedResponse>('', {
-      params: {
-        page,
-        size,
-      },
+      params,
     })
   }
 
