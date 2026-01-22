@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(TOKEN_EXPIRY_KEY, expiryTime.toString())
     
     httpClient.setAuthToken(response.access_token)
+    httpClient.setRefreshToken(response.refresh_token)
     setIsAuthenticated(true)
   }, [])
 
@@ -35,7 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem(REFRESH_TOKEN_KEY)
     localStorage.removeItem(TOKEN_EXPIRY_KEY)
     
-    httpClient.removeAuthToken()
+    httpClient.removeAllTokens()
     setIsAuthenticated(false)
   }, [])
 
@@ -89,8 +90,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false)
     }
 
+    const handleRefreshSuccess = (event: CustomEvent<LoginResponse>) => {
+      // Atualizar tokens quando o httpClient fizer refresh com sucesso
+      saveTokens(event.detail)
+    }
+
     const handleUnauthorized = async () => {
-      // Tentar reautenticar quando receber erro 401
+      // Tentar reautenticar quando receber erro 401 e refresh falhar
       try {
         const response = await authService.login({ username: 'admin', password: 'admin' })
         saveTokens(response)
@@ -102,10 +108,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     initializeAuth()
     
-    // Listener para eventos de não autorizado
+    // Listener para eventos de refresh bem-sucedido e não autorizado
+    window.addEventListener('auth:refresh-success', handleRefreshSuccess as EventListener)
     window.addEventListener('auth:unauthorized', handleUnauthorized)
     
     return () => {
+      window.removeEventListener('auth:refresh-success', handleRefreshSuccess as EventListener)
       window.removeEventListener('auth:unauthorized', handleUnauthorized)
     }
   }, [checkTokenValidity, saveTokens, clearTokens])

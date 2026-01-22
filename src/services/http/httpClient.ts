@@ -1,9 +1,15 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
 import { env } from '../../config/env'
 import { ApiError, RequestConfig } from '../../types/api.types'
+import { LoginResponse } from '../api/authService'
 
 class HttpClient {
   private client: AxiosInstance
+  private isRefreshing = false
+  private failedQueue: Array<{
+    resolve: (value?: unknown) => void
+    reject: (error?: unknown) => void
+  }> = []
 
   constructor() {
     this.client = axios.create({
@@ -21,14 +27,18 @@ class HttpClient {
     // Request interceptor
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        // Não adicionar token para endpoints de autenticação
+        // Não adicionar token para endpoints de autenticação (exceto refresh)
         const isAuthEndpoint = config.url?.includes('/autenticacao')
+        const isRefreshEndpoint = config.url?.includes('/autenticacao/refresh')
         
-        if (!isAuthEndpoint) {
-          // Adicionar token de autenticação se existir
-          const token = this.getAuthToken()
-          if (token && config.headers) {
-            config.headers.Authorization = `Bearer ${token}`
+        if (!isAuthEndpoint || isRefreshEndpoint) {
+          // Se for refresh, usar refresh token do header se já estiver definido
+          // Caso contrário, adicionar access token
+          if (!isRefreshEndpoint) {
+            const token = this.getAuthToken()
+            if (token && config.headers) {
+              config.headers.Authorization = `Bearer ${token}`
+            }
           }
         }
 
@@ -60,16 +70,80 @@ class HttpClient {
 
         return response
       },
-      (error: AxiosError) => {
+      async (error: AxiosError) => {
+        const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+
         // Tratar erro 401 (não autorizado) - token expirado ou inválido
-        if (error.response?.status === 401) {
-          const isAuthEndpoint = error.config?.url?.includes('/autenticacao')
+        if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+          const isAuthEndpoint = originalRequest.url?.includes('/autenticacao')
+          const isRefreshEndpoint = originalRequest.url?.includes('/autenticacao/refresh')
           
-          // Se não for endpoint de autenticação, limpar token e tentar reautenticar
-          if (!isAuthEndpoint) {
-            this.removeAuthToken()
-            // Disparar evento para o contexto de autenticação reautenticar
-            window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+          // Se não for endpoint de autenticação, tentar refresh
+          if (!isAuthEndpoint && !isRefreshEndpoint) {
+            originalRequest._retry = true
+
+            // Se já está fazendo refresh, adicionar à fila
+            if (this.isRefreshing) {
+              return new Promise((resolve, reject) => {
+                this.failedQueue.push({ resolve, reject })
+              })
+                .then(() => {
+                  return this.client(originalRequest)
+                })
+                .catch((err) => {
+                  return Promise.reject(err)
+                })
+            }
+
+            this.isRefreshing = true
+            const refreshToken = this.getRefreshToken()
+
+            if (refreshToken) {
+              try {
+                // Fazer refresh do token diretamente
+                const refreshResponse = await axios.post<LoginResponse>(
+                  `${env.apiBaseUrl}/autenticacao/refresh`,
+                  undefined,
+                  {
+                    headers: {
+                      Authorization: `Bearer ${refreshToken}`,
+                      'Content-Type': 'application/json',
+                    },
+                    timeout: env.apiTimeout,
+                  }
+                )
+
+                // Salvar novos tokens
+                const newTokens = refreshResponse.data
+                this.setAuthToken(newTokens.access_token)
+                this.setRefreshToken(newTokens.refresh_token)
+                
+                // Notificar contexto sobre o refresh bem-sucedido
+                window.dispatchEvent(new CustomEvent('auth:refresh-success', { detail: newTokens }))
+                
+                // Processar fila de requisições pendentes
+                this.processQueue(null)
+                this.isRefreshing = false
+
+                // Retentar a requisição original com novo token
+                if (originalRequest.headers) {
+                  originalRequest.headers.Authorization = `Bearer ${newTokens.access_token}`
+                }
+                return this.client(originalRequest)
+              } catch (refreshError) {
+                // Se refresh falhar, processar fila com erro e disparar reautenticação
+                this.processQueue(refreshError)
+                this.isRefreshing = false
+                this.removeAllTokens()
+                window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+                return Promise.reject(refreshError)
+              }
+            } else {
+              // Sem refresh token, limpar tudo e reautenticar
+              this.isRefreshing = false
+              this.removeAllTokens()
+              window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+            }
           }
         }
 
@@ -82,6 +156,17 @@ class HttpClient {
         return Promise.reject(apiError)
       }
     )
+  }
+
+  private processQueue(error: unknown): void {
+    this.failedQueue.forEach((promise) => {
+      if (error) {
+        promise.reject(error)
+      } else {
+        promise.resolve()
+      }
+    })
+    this.failedQueue = []
   }
 
   private handleError(error: AxiosError): ApiError {
@@ -111,16 +196,32 @@ class HttpClient {
   }
 
   private getAuthToken(): string | null {
-    // Implementar lógica para obter token do localStorage/sessionStorage
     return localStorage.getItem('auth_token')
+  }
+
+  public getRefreshToken(): string | null {
+    return localStorage.getItem('refresh_token')
   }
 
   public setAuthToken(token: string): void {
     localStorage.setItem('auth_token', token)
   }
 
+  public setRefreshToken(token: string): void {
+    localStorage.setItem('refresh_token', token)
+  }
+
   public removeAuthToken(): void {
     localStorage.removeItem('auth_token')
+  }
+
+  public removeRefreshToken(): void {
+    localStorage.removeItem('refresh_token')
+  }
+
+  public removeAllTokens(): void {
+    this.removeAuthToken()
+    this.removeRefreshToken()
   }
 
   async get<T = unknown>(url: string, config?: RequestConfig): Promise<T> {

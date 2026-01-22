@@ -1,4 +1,6 @@
 import { BaseService } from '../http/baseService'
+import axios from 'axios'
+import { env } from '../../config/env'
 
 export interface LoginCredentials {
   username: string
@@ -19,6 +21,23 @@ class AuthService extends BaseService {
 
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     return this.post<LoginResponse>('/login', credentials)
+  }
+
+  async refreshToken(refreshToken: string): Promise<LoginResponse> {
+    // Para refresh, fazer requisição direta com axios para não passar pelo interceptor
+    // que adicionaria o access token
+    const response = await axios.post<LoginResponse>(
+      `${env.apiBaseUrl}/autenticacao/refresh`,
+      undefined,
+      {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: env.apiTimeout,
+      }
+    )
+    return response.data
   }
 
   async logout(): Promise<void> {
