@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Pet } from '../../services/api'
 
 interface PetCardProps {
@@ -5,13 +6,30 @@ interface PetCardProps {
 }
 
 const PetCard = ({ pet }: PetCardProps) => {
+  const navigate = useNavigate()
   const imageUrl = pet.foto?.url
   const ageText = pet.idade !== undefined && pet.idade !== null 
     ? `${pet.idade} ${pet.idade === 1 ? 'ano' : 'anos'}` 
     : 'Idade não informada'
 
+  const handleClick = () => {
+    navigate(`/pets/${pet.id}`)
+  }
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+    <div
+      onClick={handleClick}
+      className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleClick()
+        }
+      }}
+      aria-label={`Ver detalhes de ${pet.nome}`}
+    >
       {imageUrl && (
         <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
           <img

@@ -7,12 +7,23 @@ export interface PetPhoto {
   url: string
 }
 
+export interface Tutor {
+  id: number
+  nome: string
+  email: string
+  telefone: string
+  endereco: string
+  cpf: number
+  foto: PetPhoto | null
+}
+
 export interface Pet {
   id: number
   nome: string
   raca: string
   idade: number
   foto: PetPhoto | null
+  tutores?: Tutor[]
 }
 
 export interface PetPaginatedResponse {
@@ -63,8 +74,8 @@ class PetService extends BaseService {
     return this.put<Pet>(`/${id}`, data)
   }
 
-  async delete(id: string): Promise<void> {
-    return this.delete<void>(`/${id}`)
+  async deletePet(id: string): Promise<void> {
+    await this.delete(`/${id}`)
   }
 }
 
