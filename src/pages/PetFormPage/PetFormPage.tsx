@@ -114,9 +114,9 @@ const PetFormPage = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto min-w-0">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 break-words">
           {isEditMode ? 'Editar Pet' : 'Novo Pet'}
         </h1>
         {!isEditMode && (
@@ -137,7 +137,7 @@ const PetFormPage = () => {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 min-w-0">
         <PetForm
           pet={pet}
           onSubmit={handleSubmit}

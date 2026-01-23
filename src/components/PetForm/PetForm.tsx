@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { CreatePetDto, Pet } from '../../services/api'
 
 interface PetFormProps {
@@ -27,6 +27,8 @@ const PetForm = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [photoError, setPhotoError] = useState<string>('')
+  const nomeTextareaRef = useRef<HTMLTextAreaElement>(null)
+  const racaTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     if (pet) {
@@ -40,6 +42,18 @@ const PetForm = ({
       }
     }
   }, [pet])
+
+  const adjustTextareaHeight = (textarea: HTMLTextAreaElement | null) => {
+    if (textarea) {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${textarea.scrollHeight}px`
+    }
+  }
+
+  useEffect(() => {
+    adjustTextareaHeight(nomeTextareaRef.current)
+    adjustTextareaHeight(racaTextareaRef.current)
+  }, [formData.nome, formData.raca])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -197,8 +211,8 @@ const PetForm = ({
                 )}
               </label>
               {selectedFile && (
-                <div className="flex flex-col items-center gap-2 w-full">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                <div className="flex flex-col items-center gap-2 w-full min-w-0">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center break-words max-w-full">
                     {selectedFile.name}
                   </p>
                   <button
@@ -218,7 +232,7 @@ const PetForm = ({
           </div>
 
           {/* Campos à direita */}
-          <div className="flex-1 space-y-6 w-full md:self-stretch">
+          <div className="flex-1 space-y-6 w-full md:self-stretch min-w-0">
             <div>
               <label
                 htmlFor="nome"
@@ -226,12 +240,16 @@ const PetForm = ({
               >
                 Nome <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
+              <textarea
+                ref={nomeTextareaRef}
                 id="nome"
                 value={formData.nome}
-                onChange={(e) => handleChange('nome', e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                onChange={(e) => {
+                  handleChange('nome', e.target.value)
+                  adjustTextareaHeight(e.target)
+                }}
+                rows={1}
+                className={`w-full min-w-0 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none overflow-hidden ${
                   errors.nome
                     ? 'border-red-500 dark:border-red-500'
                     : 'border-gray-300 dark:border-gray-600'
@@ -251,12 +269,16 @@ const PetForm = ({
               >
                 Raça <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
+              <textarea
+                ref={racaTextareaRef}
                 id="raca"
                 value={formData.raca}
-                onChange={(e) => handleChange('raca', e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                onChange={(e) => {
+                  handleChange('raca', e.target.value)
+                  adjustTextareaHeight(e.target)
+                }}
+                rows={1}
+                className={`w-full min-w-0 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none overflow-hidden ${
                   errors.raca
                     ? 'border-red-500 dark:border-red-500'
                     : 'border-gray-300 dark:border-gray-600'
@@ -307,12 +329,16 @@ const PetForm = ({
             >
               Nome <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
+            <textarea
+              ref={nomeTextareaRef}
               id="nome"
               value={formData.nome}
-              onChange={(e) => handleChange('nome', e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+              onChange={(e) => {
+                handleChange('nome', e.target.value)
+                adjustTextareaHeight(e.target)
+              }}
+              rows={1}
+              className={`w-full min-w-0 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none overflow-hidden ${
                 errors.nome
                   ? 'border-red-500 dark:border-red-500'
                   : 'border-gray-300 dark:border-gray-600'
@@ -332,12 +358,16 @@ const PetForm = ({
             >
               Raça <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
+            <textarea
+              ref={racaTextareaRef}
               id="raca"
               value={formData.raca}
-              onChange={(e) => handleChange('raca', e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+              onChange={(e) => {
+                handleChange('raca', e.target.value)
+                adjustTextareaHeight(e.target)
+              }}
+              rows={1}
+              className={`w-full min-w-0 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none overflow-hidden ${
                 errors.raca
                   ? 'border-red-500 dark:border-red-500'
                   : 'border-gray-300 dark:border-gray-600'

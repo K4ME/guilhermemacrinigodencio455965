@@ -43,17 +43,17 @@ const PetCard = ({ pet }: PetCardProps) => {
           />
         </div>
       )}
-      <div className="p-4">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+      <div className="p-4 min-w-0">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 break-words">
           {pet.nome}
         </h3>
         <div className="space-y-1">
           {pet.raca && (
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="text-sm text-gray-600 dark:text-gray-300 break-words">
               <span className="font-semibold">Raça:</span> {pet.raca}
             </p>
           )}
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-gray-600 dark:text-gray-300 break-words">
             <span className="font-semibold">Idade:</span> {ageText}
           </p>
         </div>

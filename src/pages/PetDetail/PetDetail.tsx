@@ -162,9 +162,9 @@ const PetDetail = () => {
             </div>
 
             {/* Informações do Pet - Lateral Direita */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               {/* Nome do Pet com Destaque */}
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6 border-b-4 border-blue-600 pb-4">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6 border-b-4 border-blue-600 pb-4 break-words">
                 {pet.nome}
               </h1>
 
@@ -174,15 +174,15 @@ const PetDetail = () => {
                   Informações do Pet
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 min-w-0">
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Raça</p>
-                    <p className="text-lg font-medium text-gray-900 dark:text-white">
+                    <p className="text-lg font-medium text-gray-900 dark:text-white break-words">
                       {pet.raca || 'Não informado'}
                     </p>
                   </div>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 min-w-0">
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Idade</p>
-                    <p className="text-lg font-medium text-gray-900 dark:text-white">
+                    <p className="text-lg font-medium text-gray-900 dark:text-white break-words">
                       {ageText}
                     </p>
                   </div>
@@ -214,35 +214,35 @@ const PetDetail = () => {
                           />
                         </div>
                       )}
-                      <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 break-words">
                           {tutor.nome}
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">E-mail</p>
-                            <p className="text-lg font-medium text-gray-900 dark:text-white">
+                            <p className="text-lg font-medium text-gray-900 dark:text-white break-words break-all">
                               {tutor.email || 'Não informado'}
                             </p>
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Telefone</p>
-                            <p className="text-lg font-medium text-gray-900 dark:text-white">
+                            <p className="text-lg font-medium text-gray-900 dark:text-white break-words">
                               {tutor.telefone || 'Não informado'}
                             </p>
                           </div>
                           {tutor.endereco && (
-                            <div className="md:col-span-2">
+                            <div className="md:col-span-2 min-w-0">
                               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Endereço</p>
-                              <p className="text-lg font-medium text-gray-900 dark:text-white">
+                              <p className="text-lg font-medium text-gray-900 dark:text-white break-words">
                                 {tutor.endereco}
                               </p>
                             </div>
                           )}
                           {tutor.cpf && (
-                            <div>
+                            <div className="min-w-0">
                               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">CPF</p>
-                              <p className="text-lg font-medium text-gray-900 dark:text-white">
+                              <p className="text-lg font-medium text-gray-900 dark:text-white break-words">
                                 {tutor.cpf.toString().replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}
                               </p>
                             </div>
