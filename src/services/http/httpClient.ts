@@ -6,7 +6,12 @@ import { LoginResponse } from '../api/authService'
 class HttpClient {
   private client: AxiosInstance
   private isRefreshing = false
+  private isReauthenticating = false
   private failedQueue: Array<{
+    resolve: (value?: unknown) => void
+    reject: (error?: unknown) => void
+  }> = []
+  private reauthQueue: Array<{
     resolve: (value?: unknown) => void
     reject: (error?: unknown) => void
   }> = []
@@ -136,18 +141,14 @@ class HttpClient {
                 }
                 return this.client(originalRequest)
               } catch (refreshError) {
-                // Se refresh falhar, processar fila com erro e disparar reautenticação
-                this.processQueue(refreshError)
+                // Se refresh falhar, tentar reautenticação
                 this.isRefreshing = false
-                this.removeAllTokens()
-                window.dispatchEvent(new CustomEvent('auth:unauthorized'))
-                return Promise.reject(refreshError)
+                return this.handleReauthentication(originalRequest)
               }
             } else {
-              // Sem refresh token, limpar tudo e reautenticar
+              // Sem refresh token, tentar reautenticação
               this.isRefreshing = false
-              this.removeAllTokens()
-              window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+              return this.handleReauthentication(originalRequest)
             }
           }
         }
@@ -172,6 +173,86 @@ class HttpClient {
       }
     })
     this.failedQueue = []
+  }
+
+  private processReauthQueue(error: unknown): void {
+    this.reauthQueue.forEach((promise) => {
+      if (error) {
+        promise.reject(error)
+      } else {
+        promise.resolve()
+      }
+    })
+    this.reauthQueue = []
+  }
+
+  private handleReauthentication(originalRequest: InternalAxiosRequestConfig): Promise<unknown> {
+    // Se já está fazendo reautenticação, adicionar à fila
+    if (this.isReauthenticating) {
+      return new Promise((resolve, reject) => {
+        this.reauthQueue.push({ resolve, reject })
+      })
+        .then(() => {
+          return this.client(originalRequest)
+        })
+        .catch((err) => {
+          return Promise.reject(err)
+        })
+    }
+
+    this.isReauthenticating = true
+    this.removeAllTokens()
+
+    // Disparar evento para reautenticação
+    const reauthPromise = new Promise<LoginResponse>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        window.removeEventListener('auth:reauth-success', handleSuccess)
+        window.removeEventListener('auth:reauth-failure', handleFailure)
+        reject(new Error('Timeout aguardando reautenticação'))
+      }, 10000) // 10 segundos de timeout
+
+      const handleSuccess = (event: CustomEvent<LoginResponse>) => {
+        clearTimeout(timeout)
+        window.removeEventListener('auth:reauth-success', handleSuccess)
+        window.removeEventListener('auth:reauth-failure', handleFailure)
+        resolve(event.detail)
+      }
+
+      const handleFailure = () => {
+        clearTimeout(timeout)
+        window.removeEventListener('auth:reauth-success', handleSuccess)
+        window.removeEventListener('auth:reauth-failure', handleFailure)
+        reject(new Error('Falha na reautenticação'))
+      }
+
+      window.addEventListener('auth:reauth-success', handleSuccess as EventListener)
+      window.addEventListener('auth:reauth-failure', handleFailure)
+    })
+
+    window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+
+    return reauthPromise
+      .then((newTokens) => {
+        // Salvar novos tokens
+        this.setAuthToken(newTokens.access_token)
+        this.setRefreshToken(newTokens.refresh_token)
+
+        // Processar fila de requisições pendentes
+        this.processReauthQueue(null)
+        this.isReauthenticating = false
+
+        // Retentar a requisição original com novo token
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newTokens.access_token}`
+        }
+        return this.client(originalRequest)
+      })
+      .catch((reauthError) => {
+        // Se reautenticação falhar, processar fila com erro
+        this.processReauthQueue(reauthError)
+        this.isReauthenticating = false
+        return Promise.reject(reauthError)
+      })
   }
 
   private handleError(error: AxiosError): ApiError {

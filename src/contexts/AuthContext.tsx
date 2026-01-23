@@ -100,9 +100,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const response = await authService.login({ username: 'admin', password: 'admin' })
         saveTokens(response)
+        // Notificar que reautenticação foi bem-sucedida
+        window.dispatchEvent(new CustomEvent('auth:reauth-success', { detail: response }))
       } catch (error) {
         console.error('Erro ao reautenticar:', error)
         clearTokens()
+        // Notificar que reautenticação falhou
+        window.dispatchEvent(new CustomEvent('auth:reauth-failure'))
       }
     }
 
