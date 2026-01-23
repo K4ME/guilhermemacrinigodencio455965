@@ -8,7 +8,7 @@ export type {
 } from './petService'
 
 export { tutorService } from './tutorService'
-export type { Tutor } from './petService'
+export type { Tutor, CreateTutorDto, UpdateTutorDto, TutorPaginatedResponse } from './tutorService'
 
 export { authService } from './authService'
 export type { LoginCredentials, LoginResponse } from './authService'
