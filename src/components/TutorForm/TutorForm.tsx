@@ -6,9 +6,18 @@ interface TutorFormProps {
   onSubmit: (data: CreateTutorDto) => Promise<void>
   onCancel: () => void
   isLoading?: boolean
+  onPhotoUpload?: (file: File) => Promise<void>
+  isUploadingPhoto?: boolean
 }
 
-const TutorForm = ({ tutor, onSubmit, onCancel, isLoading = false }: TutorFormProps) => {
+const TutorForm = ({
+  tutor,
+  onSubmit,
+  onCancel,
+  isLoading = false,
+  onPhotoUpload,
+  isUploadingPhoto = false,
+}: TutorFormProps) => {
   const [formData, setFormData] = useState<CreateTutorDto>({
     nome: '',
     email: '',
@@ -17,6 +26,9 @@ const TutorForm = ({ tutor, onSubmit, onCancel, isLoading = false }: TutorFormPr
     cpf: 0,
   })
   const [errors, setErrors] = useState<Partial<Record<keyof CreateTutorDto, string>>>({})
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photoError, setPhotoError] = useState<string>('')
 
   useEffect(() => {
     if (tutor) {
@@ -27,8 +39,53 @@ const TutorForm = ({ tutor, onSubmit, onCancel, isLoading = false }: TutorFormPr
         endereco: tutor.endereco || '',
         cpf: tutor.cpf || 0,
       })
+      if (tutor.foto?.url) {
+        setPhotoPreview(tutor.foto.url)
+      }
     }
   }, [tutor])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validar tipo de arquivo
+      if (!file.type.startsWith('image/')) {
+        setPhotoError('Por favor, selecione apenas arquivos de imagem')
+        return
+      }
+
+      // Validar tamanho (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setPhotoError('O arquivo deve ter no máximo 5MB')
+        return
+      }
+
+      setSelectedFile(file)
+      setPhotoError('')
+
+      // Criar preview
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handlePhotoUpload = async () => {
+    if (!selectedFile || !onPhotoUpload) {
+      return
+    }
+
+    try {
+      await onPhotoUpload(selectedFile)
+      setSelectedFile(null)
+      setPhotoError('')
+    } catch (error) {
+      console.error('Erro ao fazer upload da foto:', error)
+      setPhotoError('Erro ao enviar o arquivo da foto')
+    }
+  }
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof CreateTutorDto, string>> = {}
@@ -114,6 +171,86 @@ const TutorForm = ({ tutor, onSubmit, onCancel, isLoading = false }: TutorFormPr
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Upload de foto - apenas no modo de edição, na primeira linha */}
+      {tutor && onPhotoUpload && (
+        <div className="mb-6">
+          <div className="flex flex-col items-start gap-4">
+            <input
+              type="file"
+              id="foto"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              disabled={isLoading || isUploadingPhoto}
+            />
+            <label
+              htmlFor="foto"
+              className="relative cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {photoPreview ? (
+                <div className="relative">
+                  <img
+                    src={photoPreview}
+                    alt="Preview"
+                    className="w-48 h-48 object-contain rounded-lg border-2 border-gray-300 dark:border-gray-600 group-hover:border-blue-500 transition-colors"
+                    onError={() => {
+                      setPhotoError('Não foi possível carregar a imagem')
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all flex flex-col items-center justify-center gap-2">
+                    <span className="text-white opacity-0 group-hover:opacity-100 font-medium text-sm">
+                      Clique para trocar
+                    </span>
+                    <span className="text-white opacity-0 group-hover:opacity-100 text-xs">
+                      JPG, PNG, GIF. Máx: 5MB
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-48 h-48 bg-gray-200 dark:bg-gray-700 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 group-hover:border-blue-500 transition-colors flex items-center justify-center">
+                  <div className="text-center">
+                    <svg
+                      className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Clique para selecionar
+                    </p>
+                  </div>
+                </div>
+              )}
+            </label>
+            {selectedFile && (
+              <div className="flex flex-col items-start gap-2 w-full min-w-0">
+                <p className="text-sm text-gray-600 dark:text-gray-400 break-words max-w-full">
+                  {selectedFile.name}
+                </p>
+                <button
+                  type="button"
+                  onClick={handlePhotoUpload}
+                  disabled={isLoading || isUploadingPhoto || !!photoError}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isUploadingPhoto ? 'Enviando...' : 'Enviar Foto'}
+                </button>
+              </div>
+            )}
+            {photoError && (
+              <p className="text-sm text-red-600 dark:text-red-400">{photoError}</p>
+            )}
+          </div>
+        </div>
+      )}
+
       <div>
         <label
           htmlFor="nome"

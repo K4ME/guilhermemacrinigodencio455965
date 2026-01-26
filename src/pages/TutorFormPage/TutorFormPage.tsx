@@ -11,6 +11,7 @@ const TutorFormPage = () => {
   const [tutor, setTutor] = useState<Tutor | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadingTutor, setLoadingTutor] = useState(false)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [error, setError] = useState<ApiError | null>(null)
 
   const isEditMode = !!id
@@ -55,6 +56,29 @@ const TutorFormPage = () => {
 
   const handleCancel = () => {
     navigate(-1)
+  }
+
+  const handlePhotoUpload = async (file: File) => {
+    if (!id) return
+
+    setUploadingPhoto(true)
+    setError(null)
+
+    try {
+      const photo = await tutorService.uploadPhoto(id, file)
+      // Atualizar o tutor com a nova foto
+      if (tutor) {
+        setTutor({
+          ...tutor,
+          foto: photo,
+        })
+      }
+    } catch (err) {
+      setError(err as ApiError)
+      throw err
+    } finally {
+      setUploadingPhoto(false)
+    }
   }
 
   if (loadingTutor) {
@@ -119,6 +143,8 @@ const TutorFormPage = () => {
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isLoading={loading}
+          onPhotoUpload={isEditMode ? handlePhotoUpload : undefined}
+          isUploadingPhoto={uploadingPhoto}
         />
       </div>
     </div>

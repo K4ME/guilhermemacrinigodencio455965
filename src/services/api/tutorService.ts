@@ -53,6 +53,13 @@ class TutorService extends BaseService {
   async update(id: string, data: UpdateTutorDto): Promise<Tutor> {
     return this.put<Tutor>(`/${id}`, data)
   }
+
+  async uploadPhoto(id: string, file: File): Promise<PetPhoto> {
+    const formData = new FormData()
+    formData.append('foto', file)
+
+    return this.post<PetPhoto>(`/${id}/fotos`, formData)
+  }
 }
 
 export const tutorService = new TutorService()
