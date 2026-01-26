@@ -3,6 +3,7 @@ import { PetList } from './components/PetList'
 import { TutorList } from './components/TutorList'
 import { PetDetail } from './pages/PetDetail'
 import { PetFormPage } from './pages/PetFormPage'
+import { TutorDetail } from './pages/TutorDetail'
 import { TutorFormPage } from './pages/TutorFormPage'
 import { useAuth } from './contexts/AuthContext'
 
@@ -78,6 +79,7 @@ const AppContent = () => {
           <Route path="/pets/:id/edit" element={<PetFormPage />} />
           <Route path="/tutores" element={<TutorList />} />
           <Route path="/tutores/new" element={<TutorFormPage />} />
+          <Route path="/tutores/:id" element={<TutorDetail />} />
           <Route path="/tutores/:id/edit" element={<TutorFormPage />} />
         </Routes>
       </main>

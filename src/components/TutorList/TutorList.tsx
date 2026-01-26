@@ -58,7 +58,7 @@ const TutorList = () => {
   }
 
   const handleTutorClick = (tutorId: number) => {
-    navigate(`/tutores/${tutorId}/edit`)
+    navigate(`/tutores/${tutorId}`)
   }
 
   if (loading && !data) {
