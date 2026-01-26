@@ -15,6 +15,7 @@ export interface Tutor {
   endereco: string
   cpf: number
   foto: PetPhoto | null
+  pets?: Pet[]
 }
 
 export interface Pet {
