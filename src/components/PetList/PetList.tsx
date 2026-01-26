@@ -104,10 +104,10 @@ const PetList = () => {
   const showNoResults = searchTerm.trim() && !hasSearchResults && !loading
 
   return (
-    <>
-      <div className="mb-6">
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
-          <div className="flex-1">
+    <div className="w-full min-w-0">
+      <div className="mb-6 w-full min-w-0">
+        <div className="flex flex-col sm:flex-row gap-4 mb-4 w-full min-w-0">
+          <div className="flex-1 min-w-0">
             <SearchInput
               value={searchTerm}
               onChange={handleSearchChange}
@@ -117,12 +117,12 @@ const PetList = () => {
           </div>
           <button
             onClick={() => navigate('/pets/new')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap flex-shrink-0"
           >
             + Novo Pet
           </button>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-600 dark:text-gray-400 break-words">
           {searchTerm.trim() ? (
             <>
               {hasSearchResults ? (
@@ -151,12 +151,12 @@ const PetList = () => {
       </div>
 
       {showNoResults ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2">
+        <div className="flex items-center justify-center min-h-[400px] w-full">
+          <div className="text-center w-full px-4">
+            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2 break-words">
               Nenhum pet encontrado
             </p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 break-words">
               Não há pets com o nome &quot;{searchTerm}&quot;.
             </p>
             <button
@@ -169,22 +169,24 @@ const PetList = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full min-w-0">
             {displayedPets.map((pet) => (
               <PetCard key={pet.id} pet={pet} />
             ))}
           </div>
 
           {data && data.pageCount > 1 && (
-            <Pagination
-              currentPage={data.page}
-              totalPages={data.pageCount}
-              onPageChange={handlePageChange}
-            />
+            <div className="w-full min-w-0 mt-6">
+              <Pagination
+                currentPage={data.page}
+                totalPages={data.pageCount}
+                onPageChange={handlePageChange}
+              />
+            </div>
           )}
         </>
       )}
-    </>
+    </div>
   )
 }
 

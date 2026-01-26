@@ -31,22 +31,22 @@ const AppContent = () => {
   const location = useLocation()
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
       <header className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <div className="min-w-0">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white break-words">
                 Pet Manager
               </h1>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 break-words">
                 Gerencie seus pets e tutores de forma simples e eficiente
               </p>
             </div>
-            <nav className="flex gap-4">
+            <nav className="flex gap-4 flex-shrink-0">
               <Link
                 to="/pets"
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                   location.pathname.startsWith('/pets')
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -56,7 +56,7 @@ const AppContent = () => {
               </Link>
               <Link
                 to="/tutores"
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                   location.pathname.startsWith('/tutores')
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -69,7 +69,7 @@ const AppContent = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full min-w-0">
         <Routes>
           <Route path="/" element={<Navigate to="/pets" replace />} />
           <Route path="/pets" element={<PetList />} />

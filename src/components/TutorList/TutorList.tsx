@@ -138,10 +138,10 @@ const TutorList = () => {
   const showNoResults = searchTerm.trim() && !hasSearchResults && !loading
 
   return (
-    <>
-      <div className="mb-6">
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
-          <div className="flex-1">
+    <div className="w-full min-w-0">
+      <div className="mb-6 w-full min-w-0">
+        <div className="flex flex-col sm:flex-row gap-4 mb-4 w-full min-w-0">
+          <div className="flex-1 min-w-0">
             <SearchInput
               value={searchTerm}
               onChange={handleSearchChange}
@@ -151,12 +151,12 @@ const TutorList = () => {
           </div>
           <button
             onClick={() => navigate('/tutores/new')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap flex-shrink-0"
           >
             + Novo Tutor
           </button>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-600 dark:text-gray-400 break-words">
           {searchTerm.trim() ? (
             <>
               {hasSearchResults ? (
@@ -185,12 +185,12 @@ const TutorList = () => {
       </div>
 
       {showNoResults ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2">
+        <div className="flex items-center justify-center min-h-[400px] w-full">
+          <div className="text-center w-full px-4">
+            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2 break-words">
               Nenhum tutor encontrado
             </p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 break-words">
               Não há tutores com o nome &quot;{searchTerm}&quot;.
             </p>
             <button
@@ -203,13 +203,13 @@ const TutorList = () => {
         </div>
       ) : (
         <>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden w-full min-w-0">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {displayedTutores.map((tutor) => (
                 <div
                   key={tutor.id}
                   onClick={() => handleTutorClick(tutor.id)}
-                  className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                  className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer w-full min-w-0"
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
@@ -253,28 +253,28 @@ const TutorList = () => {
 
                   {/* Dados do tutor */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1 truncate">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1 break-words">
                       {tutor.nome}
                     </h3>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-1 text-sm text-gray-600 dark:text-gray-300">
                       {tutor.email && (
-                        <span className="truncate">
+                        <span className="break-words break-all">
                           <span className="font-medium">Email:</span> {tutor.email}
                         </span>
                       )}
                       {tutor.telefone && (
-                        <span className="whitespace-nowrap">
+                        <span className="break-words">
                           <span className="font-medium">Telefone:</span> {tutor.telefone}
                         </span>
                       )}
                       {tutor.cpf && (
-                        <span className="whitespace-nowrap">
+                        <span className="break-words">
                           <span className="font-medium">CPF:</span> {formatCpf(tutor.cpf)}
                         </span>
                       )}
                     </div>
                     {tutor.endereco && (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 break-words">
                         {tutor.endereco}
                       </p>
                     )}
@@ -302,7 +302,7 @@ const TutorList = () => {
           </div>
 
           {data && data.pageCount > 1 && (
-            <div className="mt-6">
+            <div className="mt-6 w-full min-w-0">
               <Pagination
                 currentPage={data.page}
                 totalPages={data.pageCount}
@@ -312,7 +312,7 @@ const TutorList = () => {
           )}
         </>
       )}
-    </>
+    </div>
   )
 }
 
