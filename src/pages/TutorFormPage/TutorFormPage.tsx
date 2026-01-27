@@ -5,6 +5,7 @@ import { TutorForm } from '../../components/TutorForm'
 import { handleApiError } from '../../utils/errorHandler'
 import { ApiError } from '../../types/api.types'
 import { PopConfirm } from '../../components/PopConfirm'
+import { usePhotoManagement } from '../../hooks/usePhotoManagement'
 
 const TutorFormPage = () => {
   const { id } = useParams<{ id: string }>()
@@ -12,15 +13,29 @@ const TutorFormPage = () => {
   const [tutor, setTutor] = useState<Tutor | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadingTutor, setLoadingTutor] = useState(false)
-  const [uploadingPhoto, setUploadingPhoto] = useState(false)
-  const [deletingPhoto, setDeletingPhoto] = useState(false)
   const [error, setError] = useState<ApiError | null>(null)
-  const [confirmDeletePhoto, setConfirmDeletePhoto] = useState<{
-    isOpen: boolean
-    fotoId: string | null
-  }>({
-    isOpen: false,
-    fotoId: null,
+
+  const {
+    uploadingPhoto,
+    deletingPhoto,
+    confirmDeletePhoto,
+    handlePhotoUpload,
+    handlePhotoDeleteClick,
+    handleConfirmDeletePhoto,
+    handleCloseConfirmDeletePhoto,
+  } = usePhotoManagement({
+    entityId: id,
+    onPhotoUpdated: (photo) => {
+      if (tutor) {
+        setTutor({
+          ...tutor,
+          foto: photo,
+        })
+      }
+    },
+    uploadPhoto: tutorService.uploadPhoto.bind(tutorService),
+    deletePhoto: tutorService.deletePhoto.bind(tutorService),
+    onError: (err) => setError(err),
   })
 
   const isEditMode = !!id
@@ -65,70 +80,6 @@ const TutorFormPage = () => {
 
   const handleCancel = () => {
     navigate(-1)
-  }
-
-  const handlePhotoUpload = async (file: File) => {
-    if (!id) return
-
-    setUploadingPhoto(true)
-    setError(null)
-
-    try {
-      const photo = await tutorService.uploadPhoto(id, file)
-      // Atualizar o tutor com a nova foto
-      if (tutor) {
-        setTutor({
-          ...tutor,
-          foto: photo,
-        })
-      }
-    } catch (err) {
-      setError(err as ApiError)
-      throw err
-    } finally {
-      setUploadingPhoto(false)
-    }
-  }
-
-  const handlePhotoDeleteClick = (fotoId: string) => {
-    setConfirmDeletePhoto({
-      isOpen: true,
-      fotoId,
-    })
-  }
-
-  const handleConfirmDeletePhoto = async () => {
-    if (!id || !confirmDeletePhoto.fotoId) return
-
-    setDeletingPhoto(true)
-    setError(null)
-
-    try {
-      await tutorService.deletePhoto(id, confirmDeletePhoto.fotoId)
-      // Atualizar o tutor removendo a foto
-      if (tutor) {
-        setTutor({
-          ...tutor,
-          foto: null,
-        })
-      }
-    } catch (err) {
-      setError(err as ApiError)
-      alert('Erro ao remover a foto. Tente novamente.')
-    } finally {
-      setDeletingPhoto(false)
-      setConfirmDeletePhoto({
-        isOpen: false,
-        fotoId: null,
-      })
-    }
-  }
-
-  const handleCloseConfirmDeletePhoto = () => {
-    setConfirmDeletePhoto({
-      isOpen: false,
-      fotoId: null,
-    })
   }
 
   if (loadingTutor) {

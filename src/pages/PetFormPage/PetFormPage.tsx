@@ -5,6 +5,7 @@ import { PetForm } from '../../components/PetForm'
 import { handleApiError } from '../../utils/errorHandler'
 import { ApiError } from '../../types/api.types'
 import { PopConfirm } from '../../components/PopConfirm'
+import { usePhotoManagement } from '../../hooks/usePhotoManagement'
 
 const PetFormPage = () => {
   const { id } = useParams<{ id: string }>()
@@ -12,15 +13,29 @@ const PetFormPage = () => {
   const [pet, setPet] = useState<Pet | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadingPet, setLoadingPet] = useState(false)
-  const [uploadingPhoto, setUploadingPhoto] = useState(false)
-  const [deletingPhoto, setDeletingPhoto] = useState(false)
   const [error, setError] = useState<ApiError | null>(null)
-  const [confirmDeletePhoto, setConfirmDeletePhoto] = useState<{
-    isOpen: boolean
-    fotoId: string | null
-  }>({
-    isOpen: false,
-    fotoId: null,
+
+  const {
+    uploadingPhoto,
+    deletingPhoto,
+    confirmDeletePhoto,
+    handlePhotoUpload,
+    handlePhotoDeleteClick,
+    handleConfirmDeletePhoto,
+    handleCloseConfirmDeletePhoto,
+  } = usePhotoManagement({
+    entityId: id,
+    onPhotoUpdated: (photo) => {
+      if (pet) {
+        setPet({
+          ...pet,
+          foto: photo,
+        })
+      }
+    },
+    uploadPhoto: petService.uploadPhoto.bind(petService),
+    deletePhoto: petService.deletePhoto.bind(petService),
+    onError: (err) => setError(err),
   })
 
   const isEditMode = !!id
@@ -65,69 +80,6 @@ const PetFormPage = () => {
 
   const handleCancel = () => {
     navigate(-1)
-  }
-
-  const handlePhotoUpload = async (file: File) => {
-    if (!id) return
-
-    setUploadingPhoto(true)
-    setError(null)
-
-    try {
-      const photo = await petService.uploadPhoto(id, file)
-      if (pet) {
-        setPet({
-          ...pet,
-          foto: photo,
-        })
-      }
-    } catch (err) {
-      setError(err as ApiError)
-      throw err
-    } finally {
-      setUploadingPhoto(false)
-    }
-  }
-
-  const handlePhotoDeleteClick = (fotoId: string) => {
-    setConfirmDeletePhoto({
-      isOpen: true,
-      fotoId,
-    })
-  }
-
-  const handleConfirmDeletePhoto = async () => {
-    if (!id || !confirmDeletePhoto.fotoId) return
-
-    setDeletingPhoto(true)
-    setError(null)
-
-    try {
-      await petService.deletePhoto(id, confirmDeletePhoto.fotoId)
-      // Atualizar o pet removendo a foto
-      if (pet) {
-        setPet({
-          ...pet,
-          foto: null,
-        })
-      }
-    } catch (err) {
-      setError(err as ApiError)
-      alert('Erro ao remover a foto. Tente novamente.')
-    } finally {
-      setDeletingPhoto(false)
-      setConfirmDeletePhoto({
-        isOpen: false,
-        fotoId: null,
-      })
-    }
-  }
-
-  const handleCloseConfirmDeletePhoto = () => {
-    setConfirmDeletePhoto({
-      isOpen: false,
-      fotoId: null,
-    })
   }
 
   if (loadingPet) {
