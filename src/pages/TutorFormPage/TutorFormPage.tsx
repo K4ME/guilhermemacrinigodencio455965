@@ -4,6 +4,7 @@ import { tutorService, CreateTutorDto, Tutor } from '../../services/api'
 import { TutorForm } from '../../components/TutorForm'
 import { handleApiError } from '../../utils/errorHandler'
 import { ApiError } from '../../types/api.types'
+import { PopConfirm } from '../../components/PopConfirm'
 
 const TutorFormPage = () => {
   const { id } = useParams<{ id: string }>()
@@ -12,7 +13,15 @@ const TutorFormPage = () => {
   const [loading, setLoading] = useState(false)
   const [loadingTutor, setLoadingTutor] = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [deletingPhoto, setDeletingPhoto] = useState(false)
   const [error, setError] = useState<ApiError | null>(null)
+  const [confirmDeletePhoto, setConfirmDeletePhoto] = useState<{
+    isOpen: boolean
+    fotoId: string | null
+  }>({
+    isOpen: false,
+    fotoId: null,
+  })
 
   const isEditMode = !!id
 
@@ -81,6 +90,47 @@ const TutorFormPage = () => {
     }
   }
 
+  const handlePhotoDeleteClick = (fotoId: string) => {
+    setConfirmDeletePhoto({
+      isOpen: true,
+      fotoId,
+    })
+  }
+
+  const handleConfirmDeletePhoto = async () => {
+    if (!id || !confirmDeletePhoto.fotoId) return
+
+    setDeletingPhoto(true)
+    setError(null)
+
+    try {
+      await tutorService.deletePhoto(id, confirmDeletePhoto.fotoId)
+      // Atualizar o tutor removendo a foto
+      if (tutor) {
+        setTutor({
+          ...tutor,
+          foto: null,
+        })
+      }
+    } catch (err) {
+      setError(err as ApiError)
+      alert('Erro ao remover a foto. Tente novamente.')
+    } finally {
+      setDeletingPhoto(false)
+      setConfirmDeletePhoto({
+        isOpen: false,
+        fotoId: null,
+      })
+    }
+  }
+
+  const handleCloseConfirmDeletePhoto = () => {
+    setConfirmDeletePhoto({
+      isOpen: false,
+      fotoId: null,
+    })
+  }
+
   if (loadingTutor) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -144,9 +194,37 @@ const TutorFormPage = () => {
           onCancel={handleCancel}
           isLoading={loading}
           onPhotoUpload={isEditMode ? handlePhotoUpload : undefined}
+          onPhotoDelete={isEditMode ? handlePhotoDeleteClick : undefined}
           isUploadingPhoto={uploadingPhoto}
+          isDeletingPhoto={deletingPhoto}
         />
       </div>
+
+      {/* PopConfirm para Remover Foto */}
+      <PopConfirm
+        isOpen={confirmDeletePhoto.isOpen}
+        onClose={handleCloseConfirmDeletePhoto}
+        onConfirm={handleConfirmDeletePhoto}
+        title="Remover foto"
+        message="Tem certeza que deseja remover esta foto?"
+        confirmText="Remover"
+        cancelText="Cancelar"
+        icon={
+          <svg
+            className="w-6 h-6 text-red-600 dark:text-red-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        }
+      />
     </div>
   )
 }

@@ -61,6 +61,10 @@ class TutorService extends BaseService {
     return this.post<PetPhoto>(`/${id}/fotos`, formData)
   }
 
+  async deletePhoto(id: string, fotoId: string): Promise<void> {
+    return this.delete<void>(`/${id}/fotos/${fotoId}`)
+  }
+
   async linkPet(tutorId: string, petId: string): Promise<void> {
     return this.post<void>(`/${tutorId}/pets/${petId}`)
   }
