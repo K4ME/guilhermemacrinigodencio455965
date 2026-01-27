@@ -154,4 +154,106 @@ describe('PetStore', () => {
       expect(formState.error).toBeNull()
     })
   })
+
+  describe('uploadPhoto', () => {
+    it('deve fazer upload de foto e atualizar formState quando IDs coincidem (string)', async () => {
+      const mockPhoto = { id: 1, url: 'http://example.com/photo.jpg' }
+      const mockFile = new File([''], 'photo.jpg', { type: 'image/jpeg' })
+      
+      vi.mocked(apiFacade.pets.uploadPhoto).mockResolvedValue(mockPhoto)
+      vi.mocked(apiFacade.pets.getById).mockResolvedValue({ ...mockPet, id: '1' })
+      
+      await petStore.loadPetForForm('1')
+      await petStore.uploadPhoto('1', mockFile)
+
+      expect(apiFacade.pets.uploadPhoto).toHaveBeenCalledWith('1', mockFile)
+      expect(petStore.formState.data?.foto).toEqual(mockPhoto)
+    })
+
+    it('deve fazer upload de foto e atualizar formState quando IDs coincidem (number)', async () => {
+      const mockPhoto = { id: 1, url: 'http://example.com/photo.jpg' }
+      const mockFile = new File([''], 'photo.jpg', { type: 'image/jpeg' })
+      
+      vi.mocked(apiFacade.pets.uploadPhoto).mockResolvedValue(mockPhoto)
+      vi.mocked(apiFacade.pets.getById).mockResolvedValue(mockPet)
+      
+      await petStore.loadPetForForm('1')
+      await petStore.uploadPhoto('1', mockFile)
+
+      expect(apiFacade.pets.uploadPhoto).toHaveBeenCalledWith('1', mockFile)
+      expect(petStore.formState.data?.foto).toEqual(mockPhoto)
+    })
+
+    it('deve atualizar detailState quando IDs coincidem', async () => {
+      const mockPhoto = { id: 1, url: 'http://example.com/photo.jpg' }
+      const mockFile = new File([''], 'photo.jpg', { type: 'image/jpeg' })
+      
+      vi.mocked(apiFacade.pets.uploadPhoto).mockResolvedValue(mockPhoto)
+      vi.mocked(apiFacade.pets.getById).mockResolvedValue(mockPet)
+      
+      await petStore.loadPetById('1')
+      await petStore.uploadPhoto('1', mockFile)
+
+      expect(petStore.detailState.data?.foto).toEqual(mockPhoto)
+    })
+
+    it('deve tratar erro ao fazer upload de foto', async () => {
+      const error: ApiError = { message: 'Erro ao fazer upload' }
+      const mockFile = new File([''], 'photo.jpg', { type: 'image/jpeg' })
+      
+      vi.mocked(apiFacade.pets.uploadPhoto).mockRejectedValue(error)
+      vi.mocked(apiFacade.pets.getById).mockResolvedValue(mockPet)
+      
+      await petStore.loadPetForForm('1')
+      
+      await expect(petStore.uploadPhoto('1', mockFile)).rejects.toEqual(error)
+      expect(petStore.formState.error).toEqual(error)
+    })
+  })
+
+  describe('deletePhoto', () => {
+    it('deve deletar foto e atualizar formState quando IDs coincidem (string)', async () => {
+      vi.mocked(apiFacade.pets.deletePhoto).mockResolvedValue(undefined)
+      vi.mocked(apiFacade.pets.getById).mockResolvedValue({ ...mockPet, id: '1', foto: { id: 1, url: 'http://example.com/photo.jpg' } })
+      
+      await petStore.loadPetForForm('1')
+      await petStore.deletePhoto('1', '1')
+
+      expect(apiFacade.pets.deletePhoto).toHaveBeenCalledWith('1', '1')
+      expect(petStore.formState.data?.foto).toBeNull()
+    })
+
+    it('deve deletar foto e atualizar formState quando IDs coincidem (number)', async () => {
+      vi.mocked(apiFacade.pets.deletePhoto).mockResolvedValue(undefined)
+      vi.mocked(apiFacade.pets.getById).mockResolvedValue({ ...mockPet, foto: { id: 1, url: 'http://example.com/photo.jpg' } })
+      
+      await petStore.loadPetForForm('1')
+      await petStore.deletePhoto('1', '1')
+
+      expect(apiFacade.pets.deletePhoto).toHaveBeenCalledWith('1', '1')
+      expect(petStore.formState.data?.foto).toBeNull()
+    })
+
+    it('deve atualizar detailState quando IDs coincidem', async () => {
+      vi.mocked(apiFacade.pets.deletePhoto).mockResolvedValue(undefined)
+      vi.mocked(apiFacade.pets.getById).mockResolvedValue({ ...mockPet, foto: { id: 1, url: 'http://example.com/photo.jpg' } })
+      
+      await petStore.loadPetById('1')
+      await petStore.deletePhoto('1', '1')
+
+      expect(petStore.detailState.data?.foto).toBeNull()
+    })
+
+    it('deve tratar erro ao deletar foto', async () => {
+      const error: ApiError = { message: 'Erro ao deletar foto' }
+      
+      vi.mocked(apiFacade.pets.deletePhoto).mockRejectedValue(error)
+      vi.mocked(apiFacade.pets.getById).mockResolvedValue({ ...mockPet, foto: { id: 1, url: 'http://example.com/photo.jpg' } })
+      
+      await petStore.loadPetForForm('1')
+      
+      await expect(petStore.deletePhoto('1', '1')).rejects.toEqual(error)
+      expect(petStore.formState.error).toEqual(error)
+    })
+  })
 })
