@@ -40,7 +40,6 @@ const TutorList = () => {
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
-    // Resetar para primeira página quando buscar
     setPage(0)
   }
 
@@ -49,7 +48,6 @@ const TutorList = () => {
     setPage(0)
   }
 
-  // Usar os tutores diretamente da resposta da API (busca server-side)
   const displayedTutores = data?.content || []
 
   const formatCpf = (cpf: number): string => {
@@ -93,49 +91,9 @@ const TutorList = () => {
     )
   }
 
-  if (!data || !data.content || data.content.length === 0) {
-    return (
-      <>
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row gap-4 mb-4">
-            <div className="flex-1">
-              <SearchInput
-                value={searchTerm}
-                onChange={handleSearchChange}
-                placeholder="Buscar por nome do tutor..."
-                onClear={handleClearSearch}
-              />
-            </div>
-            <button
-              onClick={() => navigate('/tutores/new')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap"
-            >
-              + Novo Tutor
-            </button>
-          </div>
-        </div>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2">
-              Nenhum tutor encontrado
-            </p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
-              Não há tutores cadastrados no momento.
-            </p>
-            <button
-              onClick={() => navigate('/tutores/new')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Cadastrar Primeiro Tutor
-            </button>
-          </div>
-        </div>
-      </>
-    )
-  }
-
   const hasSearchResults = displayedTutores.length > 0
   const showNoResults = searchTerm.trim() && !hasSearchResults && !loading
+  const hasNoData = !data || !data.content || data.content.length === 0
 
   return (
     <div className="w-full min-w-0">
@@ -156,35 +114,54 @@ const TutorList = () => {
             + Novo Tutor
           </button>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 break-words">
-          {searchTerm.trim() ? (
-            <>
-              {hasSearchResults ? (
-                <>
-                  Mostrando {displayedTutores.length} resultado{displayedTutores.length !== 1 ? 's' : ''} para &quot;{searchTerm}&quot;
-                  {data && data.total > displayedTutores.length && (
-                    <> de {data.total} total</>
-                  )}
-                </>
-              ) : (
-                <>
-                  Nenhum resultado encontrado para &quot;{searchTerm}&quot;
-                </>
-              )}
-            </>
-          ) : (
-            <>
-              {data && (
-                <>
-                  Mostrando {data.content.length} de {data.total} tutores
-                </>
-              )}
-            </>
-          )}
-        </p>
+        {!hasNoData && (
+          <p className="text-sm text-gray-600 dark:text-gray-400 break-words">
+            {searchTerm.trim() ? (
+              <>
+                {hasSearchResults ? (
+                  <>
+                    Mostrando {displayedTutores.length} resultado{displayedTutores.length !== 1 ? 's' : ''} para &quot;{searchTerm}&quot;
+                    {data && data.total > displayedTutores.length && (
+                      <> de {data.total} total</>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    Nenhum resultado encontrado para &quot;{searchTerm}&quot;
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                {data && (
+                  <>
+                    Mostrando {data.content.length} de {data.total} tutores
+                  </>
+                )}
+              </>
+            )}
+          </p>
+        )}
       </div>
 
-      {showNoResults ? (
+      {hasNoData && !searchTerm.trim() ? (
+        <div className="flex items-center justify-center min-h-[400px] w-full">
+          <div className="text-center w-full px-4">
+            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2 break-words">
+              Nenhum tutor encontrado
+            </p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 break-words">
+              Não há tutores cadastrados no momento.
+            </p>
+            <button
+              onClick={() => navigate('/tutores/new')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Cadastrar Primeiro Tutor
+            </button>
+          </div>
+        </div>
+      ) : showNoResults ? (
         <div className="flex items-center justify-center min-h-[400px] w-full">
           <div className="text-center w-full px-4">
             <p className="text-gray-600 dark:text-gray-300 text-lg mb-2 break-words">
