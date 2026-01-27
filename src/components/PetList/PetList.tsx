@@ -1,177 +1,93 @@
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { petService, PetPaginatedResponse } from '../../services/api'
+import { petService } from '../../services/api'
 import { PetCard } from '../PetCard'
 import { Pagination } from '../Pagination'
-import { SearchInput } from '../SearchInput'
-import { handleApiError } from '../../utils/errorHandler'
-import { ApiError } from '../../types/api.types'
+import { SearchHeader } from '../SearchHeader'
+import { ResultsInfo } from '../ResultsInfo'
+import { EmptyState } from '../EmptyState'
+import { ErrorState } from '../ErrorState'
+import { LoadingSpinner } from '../LoadingSpinner'
+import { usePaginatedList } from '../../hooks'
 
 const PetList = () => {
   const navigate = useNavigate()
-  const [page, setPage] = useState(0)
-  const [size] = useState(10)
-  const [data, setData] = useState<PetPaginatedResponse | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<ApiError | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
 
-  const fetchPets = async (currentPage: number, searchName?: string) => {
-    setLoading(true)
-    setError(null)
+  const fetchPets = useMemo(
+    () => (page: number, size: number, searchName?: string) =>
+      petService.getAll(page, size, searchName),
+    []
+  )
 
-    try {
-      const response = await petService.getAll(currentPage, size, searchName)
-      setData(response)
-    } catch (err) {
-      setError(err as ApiError)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchPets(page, searchTerm.trim() || undefined)
-  }, [page, searchTerm])
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value)
-    // Resetar para primeira página quando buscar
-    setPage(0)
-  }
-
-  const handleClearSearch = () => {
-    setSearchTerm('')
-    setPage(0)
-  }
-
-  const displayedPets = data?.content || []
+  const {
+    data,
+    loading,
+    error,
+    searchTerm,
+    displayedItems: displayedPets,
+    hasSearchResults,
+    showNoResults,
+    hasNoData,
+    handlePageChange,
+    handleSearchChange,
+    handleClearSearch,
+    refetch,
+  } = usePaginatedList({
+    fetchFunction: fetchPets,
+    size: 10,
+  })
 
   if (loading && !data) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Carregando pets...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner message="Carregando pets..." />
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 max-w-md">
-          <p className="text-red-600 dark:text-red-400 font-semibold mb-2">
-            Erro ao carregar pets
-          </p>
-          <p className="text-red-500 dark:text-red-300 text-sm mb-4">
-            {handleApiError(error)}
-          </p>
-          <button
-            onClick={() => fetchPets(page, searchTerm.trim() || undefined)}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Tentar novamente
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        error={error}
+        title="Erro ao carregar pets"
+        onRetry={refetch}
+      />
     )
   }
 
-
-  const hasSearchResults = displayedPets.length > 0
-  const showNoResults = searchTerm.trim() && !hasSearchResults && !loading
-  const hasNoData = !data || !data.content || data.content.length === 0
+  const resultsInfo = !hasNoData ? (
+    <ResultsInfo
+      searchTerm={searchTerm}
+      hasSearchResults={hasSearchResults}
+      displayedCount={displayedPets.length}
+      totalCount={data?.total}
+      entityName="pet"
+      entityNamePlural="pets"
+    />
+  ) : undefined
 
   return (
     <div className="w-full min-w-0">
-      <div className="mb-6 w-full min-w-0">
-        <div className="flex flex-col sm:flex-row gap-4 mb-4 w-full min-w-0">
-          <div className="flex-1 min-w-0">
-            <SearchInput
-              value={searchTerm}
-              onChange={handleSearchChange}
-              placeholder="Buscar por nome do pet..."
-              onClear={handleClearSearch}
-            />
-          </div>
-          <button
-            onClick={() => navigate('/pets/new')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap flex-shrink-0"
-          >
-            + Novo Pet
-          </button>
-        </div>
-        {!hasNoData && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 break-words">
-            {searchTerm.trim() ? (
-              <>
-                {hasSearchResults ? (
-                  <>
-                    Mostrando {displayedPets.length} resultado{displayedPets.length !== 1 ? 's' : ''} para &quot;{searchTerm}&quot;
-                    {data && data.total > displayedPets.length && (
-                      <> de {data.total} total</>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    Nenhum resultado encontrado para &quot;{searchTerm}&quot;
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                {data && (
-                  <>
-                    Mostrando {data.content.length} de {data.total} pets
-                  </>
-                )}
-              </>
-            )}
-          </p>
-        )}
-      </div>
+      <SearchHeader
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        onClearSearch={handleClearSearch}
+        onNewClick={() => navigate('/pets/new')}
+        searchPlaceholder="Buscar por nome do pet..."
+        newButtonLabel="+ Novo Pet"
+        resultsInfo={resultsInfo}
+      />
 
       {hasNoData && !searchTerm.trim() ? (
-        <div className="flex items-center justify-center min-h-[400px] w-full">
-          <div className="text-center w-full px-4">
-            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2 break-words">
-              Nenhum pet encontrado
-            </p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 break-words">
-              Não há pets cadastrados no momento.
-            </p>
-            <button
-              onClick={() => navigate('/pets/new')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Cadastrar Primeiro Pet
-            </button>
-          </div>
-        </div>
+        <EmptyState
+          title="Nenhum pet encontrado"
+          message="Não há pets cadastrados no momento."
+          actionLabel="Cadastrar Primeiro Pet"
+          onAction={() => navigate('/pets/new')}
+        />
       ) : showNoResults ? (
-        <div className="flex items-center justify-center min-h-[400px] w-full">
-          <div className="text-center w-full px-4">
-            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2 break-words">
-              Nenhum pet encontrado
-            </p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 break-words">
-              Não há pets com o nome &quot;{searchTerm}&quot;.
-            </p>
-            <button
-              onClick={handleClearSearch}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Limpar busca
-            </button>
-          </div>
-        </div>
+        <EmptyState
+          title="Nenhum pet encontrado"
+          message={`Não há pets com o nome "${searchTerm}".`}
+          actionLabel="Limpar busca"
+          onAction={handleClearSearch}
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full min-w-0">

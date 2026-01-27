@@ -1,54 +1,40 @@
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { tutorService, TutorPaginatedResponse, Tutor } from '../../services/api'
+import { tutorService, Tutor } from '../../services/api'
 import { Pagination } from '../Pagination'
-import { SearchInput } from '../SearchInput'
-import { handleApiError } from '../../utils/errorHandler'
-import { ApiError } from '../../types/api.types'
+import { SearchHeader } from '../SearchHeader'
+import { ResultsInfo } from '../ResultsInfo'
+import { EmptyState } from '../EmptyState'
+import { ErrorState } from '../ErrorState'
+import { LoadingSpinner } from '../LoadingSpinner'
+import { usePaginatedList } from '../../hooks'
 
 const TutorList = () => {
   const navigate = useNavigate()
-  const [page, setPage] = useState(0)
-  const [size] = useState(10)
-  const [data, setData] = useState<TutorPaginatedResponse | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<ApiError | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
 
-  const fetchTutores = async (currentPage: number, searchName?: string) => {
-    setLoading(true)
-    setError(null)
+  const fetchTutores = useMemo(
+    () => (page: number, size: number, searchName?: string) =>
+      tutorService.getAll(page, size, searchName),
+    []
+  )
 
-    try {
-      const response = await tutorService.getAll(currentPage, size, searchName)
-      setData(response)
-    } catch (err) {
-      setError(err as ApiError)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchTutores(page, searchTerm.trim() || undefined)
-  }, [page, searchTerm])
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value)
-    setPage(0)
-  }
-
-  const handleClearSearch = () => {
-    setSearchTerm('')
-    setPage(0)
-  }
-
-  const displayedTutores = data?.content || []
+  const {
+    data,
+    loading,
+    error,
+    searchTerm,
+    displayedItems: displayedTutores,
+    hasSearchResults,
+    showNoResults,
+    hasNoData,
+    handlePageChange,
+    handleSearchChange,
+    handleClearSearch,
+    refetch,
+  } = usePaginatedList({
+    fetchFunction: fetchTutores,
+    size: 10,
+  })
 
   const formatCpf = (cpf: number): string => {
     const cpfStr = cpf.toString().padStart(11, '0')
@@ -60,124 +46,56 @@ const TutorList = () => {
   }
 
   if (loading && !data) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Carregando tutores...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner message="Carregando tutores..." />
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 max-w-md">
-          <p className="text-red-600 dark:text-red-400 font-semibold mb-2">
-            Erro ao carregar tutores
-          </p>
-          <p className="text-red-500 dark:text-red-300 text-sm mb-4">
-            {handleApiError(error)}
-          </p>
-          <button
-            onClick={() => fetchTutores(page, searchTerm.trim() || undefined)}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Tentar novamente
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        error={error}
+        title="Erro ao carregar tutores"
+        onRetry={refetch}
+      />
     )
   }
 
-  const hasSearchResults = displayedTutores.length > 0
-  const showNoResults = searchTerm.trim() && !hasSearchResults && !loading
-  const hasNoData = !data || !data.content || data.content.length === 0
+  const resultsInfo = !hasNoData ? (
+    <ResultsInfo
+      searchTerm={searchTerm}
+      hasSearchResults={hasSearchResults}
+      displayedCount={displayedTutores.length}
+      totalCount={data?.total}
+      entityName="tutor"
+      entityNamePlural="tutores"
+    />
+  ) : undefined
 
   return (
     <div className="w-full min-w-0">
-      <div className="mb-6 w-full min-w-0">
-        <div className="flex flex-col sm:flex-row gap-4 mb-4 w-full min-w-0">
-          <div className="flex-1 min-w-0">
-            <SearchInput
-              value={searchTerm}
-              onChange={handleSearchChange}
-              placeholder="Buscar por nome do tutor..."
-              onClear={handleClearSearch}
-            />
-          </div>
-          <button
-            onClick={() => navigate('/tutores/new')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap flex-shrink-0"
-          >
-            + Novo Tutor
-          </button>
-        </div>
-        {!hasNoData && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 break-words">
-            {searchTerm.trim() ? (
-              <>
-                {hasSearchResults ? (
-                  <>
-                    Mostrando {displayedTutores.length} resultado{displayedTutores.length !== 1 ? 's' : ''} para &quot;{searchTerm}&quot;
-                    {data && data.total > displayedTutores.length && (
-                      <> de {data.total} total</>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    Nenhum resultado encontrado para &quot;{searchTerm}&quot;
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                {data && (
-                  <>
-                    Mostrando {data.content.length} de {data.total} tutores
-                  </>
-                )}
-              </>
-            )}
-          </p>
-        )}
-      </div>
+      <SearchHeader
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        onClearSearch={handleClearSearch}
+        onNewClick={() => navigate('/tutores/new')}
+        searchPlaceholder="Buscar por nome do tutor..."
+        newButtonLabel="+ Novo Tutor"
+        resultsInfo={resultsInfo}
+      />
 
       {hasNoData && !searchTerm.trim() ? (
-        <div className="flex items-center justify-center min-h-[400px] w-full">
-          <div className="text-center w-full px-4">
-            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2 break-words">
-              Nenhum tutor encontrado
-            </p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 break-words">
-              Não há tutores cadastrados no momento.
-            </p>
-            <button
-              onClick={() => navigate('/tutores/new')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Cadastrar Primeiro Tutor
-            </button>
-          </div>
-        </div>
+        <EmptyState
+          title="Nenhum tutor encontrado"
+          message="Não há tutores cadastrados no momento."
+          actionLabel="Cadastrar Primeiro Tutor"
+          onAction={() => navigate('/tutores/new')}
+        />
       ) : showNoResults ? (
-        <div className="flex items-center justify-center min-h-[400px] w-full">
-          <div className="text-center w-full px-4">
-            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2 break-words">
-              Nenhum tutor encontrado
-            </p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 break-words">
-              Não há tutores com o nome &quot;{searchTerm}&quot;.
-            </p>
-            <button
-              onClick={handleClearSearch}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Limpar busca
-            </button>
-          </div>
-        </div>
+        <EmptyState
+          title="Nenhum tutor encontrado"
+          message={`Não há tutores com o nome "${searchTerm}".`}
+          actionLabel="Limpar busca"
+          onAction={handleClearSearch}
+        />
       ) : (
         <>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden w-full min-w-0">
