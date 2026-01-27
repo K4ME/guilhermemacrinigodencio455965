@@ -1,41 +1,43 @@
-import { useMemo } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFacade } from '../../services/facade'
-import type { Tutor } from '../../services/facade'
+import { tutorStore } from '../../stores'
+import { useStore } from '../../hooks/useStore'
 import { Pagination } from '../Pagination'
 import { SearchHeader } from '../SearchHeader'
 import { ResultsInfo } from '../ResultsInfo'
 import { EmptyState } from '../EmptyState'
 import { ErrorState } from '../ErrorState'
 import { LoadingSpinner } from '../LoadingSpinner'
-import { usePaginatedList } from '../../hooks'
 
 const TutorList = () => {
   const navigate = useNavigate()
+  const listState = useStore(tutorStore.listState$)
 
-  const fetchTutores = useMemo(
-    () => (page: number, size: number, searchName?: string) =>
-      apiFacade.tutors.getAll(page, size, searchName),
-    []
-  )
+  useEffect(() => {
+    tutorStore.loadTutors(listState.page, 10, listState.searchTerm || undefined)
+  }, [listState.page, listState.searchTerm])
 
-  const {
-    data,
-    loading,
-    error,
-    searchTerm,
-    displayedItems: displayedTutores,
-    hasSearchResults,
-    showNoResults,
-    hasNoData,
-    handlePageChange,
-    handleSearchChange,
-    handleClearSearch,
-    refetch,
-  } = usePaginatedList({
-    fetchFunction: fetchTutores,
-    size: 10,
-  })
+  const displayedTutores = listState.data?.content || []
+  const hasSearchResults = displayedTutores.length > 0
+  const showNoResults = listState.searchTerm.trim() && !hasSearchResults && !listState.loading
+  const hasNoData = !listState.data || !listState.data.content || listState.data.content.length === 0
+
+  const handlePageChange = (newPage: number) => {
+    tutorStore.setPage(newPage)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleSearchChange = (value: string) => {
+    tutorStore.setSearchTerm(value)
+  }
+
+  const handleClearSearch = () => {
+    tutorStore.setSearchTerm('')
+  }
+
+  const refetch = () => {
+    tutorStore.loadTutors(listState.page, 10, listState.searchTerm || undefined)
+  }
 
   const formatCpf = (cpf: number): string => {
     const cpfStr = cpf.toString().padStart(11, '0')
@@ -46,14 +48,14 @@ const TutorList = () => {
     navigate(`/tutores/${tutorId}`)
   }
 
-  if (loading && !data) {
+  if (listState.loading && !listState.data) {
     return <LoadingSpinner message="Carregando tutores..." />
   }
 
-  if (error) {
+  if (listState.error) {
     return (
       <ErrorState
-        error={error}
+        error={listState.error}
         title="Erro ao carregar tutores"
         onRetry={refetch}
       />
@@ -62,10 +64,10 @@ const TutorList = () => {
 
   const resultsInfo = !hasNoData ? (
     <ResultsInfo
-      searchTerm={searchTerm}
+      searchTerm={listState.searchTerm}
       hasSearchResults={hasSearchResults}
       displayedCount={displayedTutores.length}
-      totalCount={data?.total}
+      totalCount={listState.data?.total}
       entityName="tutor"
       entityNamePlural="tutores"
     />
@@ -74,7 +76,7 @@ const TutorList = () => {
   return (
     <div className="w-full min-w-0">
       <SearchHeader
-        searchTerm={searchTerm}
+        searchTerm={listState.searchTerm}
         onSearchChange={handleSearchChange}
         onClearSearch={handleClearSearch}
         onNewClick={() => navigate('/tutores/new')}
@@ -83,7 +85,7 @@ const TutorList = () => {
         resultsInfo={resultsInfo}
       />
 
-      {hasNoData && !searchTerm.trim() ? (
+      {hasNoData && !listState.searchTerm.trim() ? (
         <EmptyState
           title="Nenhum tutor encontrado"
           message="Não há tutores cadastrados no momento."
@@ -93,7 +95,7 @@ const TutorList = () => {
       ) : showNoResults ? (
         <EmptyState
           title="Nenhum tutor encontrado"
-          message={`Não há tutores com o nome "${searchTerm}".`}
+          message={`Não há tutores com o nome "${listState.searchTerm}".`}
           actionLabel="Limpar busca"
           onAction={handleClearSearch}
         />
@@ -197,11 +199,11 @@ const TutorList = () => {
             </div>
           </div>
 
-          {data && data.pageCount > 1 && (
+          {listState.data && listState.data.pageCount > 1 && (
             <div className="mt-6 w-full min-w-0">
               <Pagination
-                currentPage={data.page}
-                totalPages={data.pageCount}
+                currentPage={listState.data.page}
+                totalPages={listState.data.pageCount}
                 onPageChange={handlePageChange}
               />
             </div>

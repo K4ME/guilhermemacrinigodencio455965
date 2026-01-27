@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFacade } from '../../services/facade'
+import { petStore } from '../../stores'
+import { useStore } from '../../hooks/useStore'
 import { PetCard } from '../PetCard'
 import { Pagination } from '../Pagination'
 import { SearchHeader } from '../SearchHeader'
@@ -8,43 +9,45 @@ import { ResultsInfo } from '../ResultsInfo'
 import { EmptyState } from '../EmptyState'
 import { ErrorState } from '../ErrorState'
 import { LoadingSpinner } from '../LoadingSpinner'
-import { usePaginatedList } from '../../hooks'
 
 const PetList = () => {
   const navigate = useNavigate()
+  const listState = useStore(petStore.listState$)
 
-  const fetchPets = useMemo(
-    () => (page: number, size: number, searchName?: string) =>
-      apiFacade.pets.getAll(page, size, searchName),
-    []
-  )
+  useEffect(() => {
+    petStore.loadPets(listState.page, 10, listState.searchTerm || undefined)
+  }, [listState.page, listState.searchTerm])
 
-  const {
-    data,
-    loading,
-    error,
-    searchTerm,
-    displayedItems: displayedPets,
-    hasSearchResults,
-    showNoResults,
-    hasNoData,
-    handlePageChange,
-    handleSearchChange,
-    handleClearSearch,
-    refetch,
-  } = usePaginatedList({
-    fetchFunction: fetchPets,
-    size: 10,
-  })
+  const displayedPets = listState.data?.content || []
+  const hasSearchResults = displayedPets.length > 0
+  const showNoResults = listState.searchTerm.trim() && !hasSearchResults && !listState.loading
+  const hasNoData = !listState.data || !listState.data.content || listState.data.content.length === 0
 
-  if (loading && !data) {
+  const handlePageChange = (newPage: number) => {
+    petStore.setPage(newPage)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleSearchChange = (value: string) => {
+    petStore.setSearchTerm(value)
+  }
+
+  const handleClearSearch = () => {
+    petStore.setSearchTerm('')
+  }
+
+  const refetch = () => {
+    petStore.loadPets(listState.page, 10, listState.searchTerm || undefined)
+  }
+
+  if (listState.loading && !listState.data) {
     return <LoadingSpinner message="Carregando pets..." />
   }
 
-  if (error) {
+  if (listState.error) {
     return (
       <ErrorState
-        error={error}
+        error={listState.error}
         title="Erro ao carregar pets"
         onRetry={refetch}
       />
@@ -53,10 +56,10 @@ const PetList = () => {
 
   const resultsInfo = !hasNoData ? (
     <ResultsInfo
-      searchTerm={searchTerm}
+      searchTerm={listState.searchTerm}
       hasSearchResults={hasSearchResults}
       displayedCount={displayedPets.length}
-      totalCount={data?.total}
+      totalCount={listState.data?.total}
       entityName="pet"
       entityNamePlural="pets"
     />
@@ -65,7 +68,7 @@ const PetList = () => {
   return (
     <div className="w-full min-w-0">
       <SearchHeader
-        searchTerm={searchTerm}
+        searchTerm={listState.searchTerm}
         onSearchChange={handleSearchChange}
         onClearSearch={handleClearSearch}
         onNewClick={() => navigate('/pets/new')}
@@ -74,7 +77,7 @@ const PetList = () => {
         resultsInfo={resultsInfo}
       />
 
-      {hasNoData && !searchTerm.trim() ? (
+      {hasNoData && !listState.searchTerm.trim() ? (
         <EmptyState
           title="Nenhum pet encontrado"
           message="Não há pets cadastrados no momento."
@@ -84,7 +87,7 @@ const PetList = () => {
       ) : showNoResults ? (
         <EmptyState
           title="Nenhum pet encontrado"
-          message={`Não há pets com o nome "${searchTerm}".`}
+          message={`Não há pets com o nome "${listState.searchTerm}".`}
           actionLabel="Limpar busca"
           onAction={handleClearSearch}
         />
@@ -96,11 +99,11 @@ const PetList = () => {
             ))}
           </div>
 
-          {data && data.pageCount > 1 && (
+          {listState.data && listState.data.pageCount > 1 && (
             <div className="w-full min-w-0 mt-6">
               <Pagination
-                currentPage={data.page}
-                totalPages={data.pageCount}
+                currentPage={listState.data.page}
+                totalPages={listState.data.pageCount}
                 onPageChange={handlePageChange}
               />
             </div>

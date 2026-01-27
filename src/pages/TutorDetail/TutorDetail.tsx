@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { apiFacade } from '../../services/facade'
-import type { Tutor } from '../../services/facade'
+import { tutorStore } from '../../stores'
+import { useStore } from '../../hooks/useStore'
 import { handleApiError } from '../../utils/errorHandler'
-import { ApiError } from '../../types/api.types'
 import { LinkPetModal } from '../../components/LinkPetModal'
 import { PopConfirm } from '../../components/PopConfirm'
 
 const TutorDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [tutor, setTutor] = useState<Tutor | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<ApiError | null>(null)
+  const detailState = useStore(tutorStore.detailState$)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [unlinkingPetId, setUnlinkingPetId] = useState<number | null>(null)
   const [confirmUnlink, setConfirmUnlink] = useState<{
@@ -26,27 +23,9 @@ const TutorDetail = () => {
   })
 
   useEffect(() => {
-    const fetchTutorDetails = async () => {
-      if (!id) {
-        setError({ message: 'ID do tutor não fornecido' })
-        setLoading(false)
-        return
-      }
-
-      setLoading(true)
-      setError(null)
-
-      try {
-        const tutorData = await apiFacade.tutors.getById(id)
-        setTutor(tutorData)
-      } catch (err) {
-        setError(err as ApiError)
-      } finally {
-        setLoading(false)
-      }
+    if (id) {
+      tutorStore.loadTutorById(id)
     }
-
-    fetchTutorDetails()
   }, [id])
 
   const handleGoBack = () => {
@@ -60,11 +39,8 @@ const TutorDetail = () => {
 
   const handleLinkPet = async (petId: string) => {
     if (!id) return
-
     try {
-      await apiFacade.tutors.linkPet(id, petId)
-      const tutorData = await apiFacade.tutors.getById(id)
-      setTutor(tutorData)
+      await tutorStore.linkPet(id, petId)
     } catch (err) {
       throw err
     }
@@ -91,9 +67,7 @@ const TutorDetail = () => {
 
     setUnlinkingPetId(confirmUnlink.petId)
     try {
-      await apiFacade.tutors.unlinkPet(id, confirmUnlink.petId.toString())
-      const tutorData = await apiFacade.tutors.getById(id)
-      setTutor(tutorData)
+      await tutorStore.unlinkPet(id, confirmUnlink.petId.toString())
     } catch (err) {
       console.error('Erro ao desvincular pet:', err)
       alert('Erro ao remover o vínculo. Tente novamente.')
@@ -115,7 +89,7 @@ const TutorDetail = () => {
     })
   }
 
-  if (loading) {
+  if (detailState.loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -126,7 +100,7 @@ const TutorDetail = () => {
     )
   }
 
-  if (error) {
+  if (detailState.error) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 max-w-md">
@@ -134,7 +108,7 @@ const TutorDetail = () => {
             Erro ao carregar tutor
           </p>
           <p className="text-red-500 dark:text-red-300 text-sm mb-4">
-            {handleApiError(error)}
+            {handleApiError(detailState.error)}
           </p>
           <button
             onClick={handleGoBack}
@@ -147,7 +121,7 @@ const TutorDetail = () => {
     )
   }
 
-  if (!tutor) {
+  if (!detailState.data) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -164,6 +138,8 @@ const TutorDetail = () => {
       </div>
     )
   }
+
+  const tutor = detailState.data
 
   return (
     <div className="max-w-4xl mx-auto">

@@ -1,81 +1,79 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { apiFacade } from '../../services/facade'
-import type { CreateTutorDto, Tutor } from '../../services/facade'
+import { tutorStore } from '../../stores'
+import { useStore } from '../../hooks/useStore'
+import type { CreateTutorDto } from '../../services/facade'
 import { TutorForm } from '../../components/TutorForm'
 import { handleApiError } from '../../utils/errorHandler'
-import { ApiError } from '../../types/api.types'
 import { PopConfirm } from '../../components/PopConfirm'
-import { usePhotoManagement } from '../../hooks/usePhotoManagement'
 
 const TutorFormPage = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [tutor, setTutor] = useState<Tutor | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [loadingTutor, setLoadingTutor] = useState(false)
-  const [error, setError] = useState<ApiError | null>(null)
-
-  const {
-    uploadingPhoto,
-    deletingPhoto,
-    confirmDeletePhoto,
-    handlePhotoUpload,
-    handlePhotoDeleteClick,
-    handleConfirmDeletePhoto,
-    handleCloseConfirmDeletePhoto,
-  } = usePhotoManagement({
-    entityId: id,
-    onPhotoUpdated: (photo) => {
-      if (tutor) {
-        setTutor({
-          ...tutor,
-          foto: photo,
-        })
-      }
-    },
-    uploadPhoto: apiFacade.tutors.uploadPhoto.bind(apiFacade.tutors),
-    deletePhoto: apiFacade.tutors.deletePhoto.bind(apiFacade.tutors),
-    onError: (err) => setError(err),
+  const formState = useStore(tutorStore.formState$)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [deletingPhoto, setDeletingPhoto] = useState(false)
+  const [confirmDeletePhoto, setConfirmDeletePhoto] = useState<{
+    isOpen: boolean
+    fotoId: string | null
+  }>({
+    isOpen: false,
+    fotoId: null,
   })
 
   const isEditMode = !!id
 
   useEffect(() => {
     if (isEditMode && id) {
-      const fetchTutor = async () => {
-        setLoadingTutor(true)
-        setError(null)
-
-        try {
-          const tutorData = await apiFacade.tutors.getById(id)
-          setTutor(tutorData)
-        } catch (err) {
-          setError(err as ApiError)
-        } finally {
-          setLoadingTutor(false)
-        }
-      }
-
-      fetchTutor()
+      tutorStore.loadTutorForForm(id)
+    } else {
+      tutorStore.resetFormState()
     }
   }, [id, isEditMode])
 
-  const handleSubmit = async (data: CreateTutorDto) => {
-    setLoading(true)
-    setError(null)
+  const handlePhotoUpload = async (file: File) => {
+    if (!id) return
+    setUploadingPhoto(true)
+    try {
+      await tutorStore.uploadPhoto(id, file)
+    } catch (error) {
+      throw error
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
 
+  const handlePhotoDeleteClick = (fotoId: string) => {
+    setConfirmDeletePhoto({ isOpen: true, fotoId })
+  }
+
+  const handleConfirmDeletePhoto = async () => {
+    if (!id || !confirmDeletePhoto.fotoId) return
+    setDeletingPhoto(true)
+    try {
+      await tutorStore.deletePhoto(id, confirmDeletePhoto.fotoId)
+      setConfirmDeletePhoto({ isOpen: false, fotoId: null })
+    } catch (error) {
+      alert('Erro ao remover a foto. Tente novamente.')
+    } finally {
+      setDeletingPhoto(false)
+    }
+  }
+
+  const handleCloseConfirmDeletePhoto = () => {
+    setConfirmDeletePhoto({ isOpen: false, fotoId: null })
+  }
+
+  const handleSubmit = async (data: CreateTutorDto) => {
     try {
       if (isEditMode && id) {
-        await apiFacade.tutors.update(id, data)
+        await tutorStore.updateTutor(id, data)
       } else {
-        await apiFacade.tutors.create(data)
+        await tutorStore.createTutor(data)
       }
       navigate('/tutores')
     } catch (err) {
-      setError(err as ApiError)
-    } finally {
-      setLoading(false)
+      // Erro já está no formState
     }
   }
 
@@ -83,7 +81,7 @@ const TutorFormPage = () => {
     navigate(-1)
   }
 
-  if (loadingTutor) {
+  if (formState.loading && isEditMode) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -94,7 +92,7 @@ const TutorFormPage = () => {
     )
   }
 
-  if (error && isEditMode) {
+  if (formState.error && isEditMode) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 max-w-md">
@@ -102,7 +100,7 @@ const TutorFormPage = () => {
             Erro ao carregar tutor
           </p>
           <p className="text-red-500 dark:text-red-300 text-sm mb-4">
-            {handleApiError(error)}
+            {handleApiError(formState.error)}
           </p>
           <button
             onClick={handleCancel}
@@ -128,23 +126,23 @@ const TutorFormPage = () => {
         )}
       </div>
 
-      {error && !isEditMode && (
+      {formState.error && !isEditMode && (
         <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
           <p className="text-red-600 dark:text-red-400 font-semibold mb-1">
             Erro ao salvar tutor
           </p>
           <p className="text-red-500 dark:text-red-300 text-sm">
-            {handleApiError(error)}
+            {handleApiError(formState.error)}
           </p>
         </div>
       )}
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
         <TutorForm
-          tutor={tutor}
+          tutor={formState.data}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
-          isLoading={loading}
+          isLoading={formState.loading}
           onPhotoUpload={isEditMode ? handlePhotoUpload : undefined}
           onPhotoDelete={isEditMode ? handlePhotoDeleteClick : undefined}
           isUploadingPhoto={uploadingPhoto}

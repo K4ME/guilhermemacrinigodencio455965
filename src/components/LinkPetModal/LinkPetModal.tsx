@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
-import { apiFacade } from '../../services/facade'
-import type { Pet, PetPaginatedResponse } from '../../services/facade'
+import { petStore } from '../../stores'
+import { useStore } from '../../hooks/useStore'
 import { SearchInput } from '../SearchInput'
 import { handleApiError } from '../../utils/errorHandler'
-import { ApiError } from '../../types/api.types'
 
 interface LinkPetModalProps {
   isOpen: boolean
@@ -20,43 +19,21 @@ const LinkPetModal = ({
   tutorId,
   linkedPetIds = [],
 }: LinkPetModalProps) => {
-  const [pets, setPets] = useState<Pet[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<ApiError | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [page, setPage] = useState(0)
-  const [pagination, setPagination] = useState<PetPaginatedResponse | null>(null)
+  const listState = useStore(petStore.listState$)
   const [linkingPetId, setLinkingPetId] = useState<string | null>(null)
-
-  const fetchPets = async (currentPage: number, searchName?: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const response = await apiFacade.pets.getAll(currentPage, 10, searchName)
-      setPets(response.content)
-      setPagination(response)
-    } catch (err) {
-      setError(err as ApiError)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   useEffect(() => {
     if (isOpen) {
-      fetchPets(page, searchTerm.trim() || undefined)
+      petStore.loadPets(listState.page, 10, listState.searchTerm || undefined)
     }
-  }, [isOpen, page, searchTerm])
+  }, [isOpen, listState.page, listState.searchTerm])
 
   const handleSearchChange = (value: string) => {
-    setSearchTerm(value)
-    setPage(0)
+    petStore.setSearchTerm(value)
   }
 
   const handleClearSearch = () => {
-    setSearchTerm('')
-    setPage(0)
+    petStore.setSearchTerm('')
   }
 
   const handleLinkPet = async (petId: string) => {
@@ -65,8 +42,7 @@ const LinkPetModal = ({
     setLinkingPetId(petId)
     try {
       await onLinkPet(petId)
-      // Recarregar lista após vincular
-      await fetchPets(page, searchTerm.trim() || undefined)
+      petStore.loadPets(listState.page, 10, listState.searchTerm || undefined)
     } catch (err) {
       console.error('Erro ao vincular pet:', err)
     } finally {
@@ -75,8 +51,13 @@ const LinkPetModal = ({
   }
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage)
+    petStore.setPage(newPage)
   }
+
+  const pets = listState.data?.content || []
+  const pagination = listState.data
+  const loading = listState.loading
+  const error = listState.error
 
   if (!isOpen) return null
 
@@ -112,7 +93,7 @@ const LinkPetModal = ({
         {/* Search */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <SearchInput
-            value={searchTerm}
+            value={listState.searchTerm}
             onChange={handleSearchChange}
             placeholder="Buscar por nome do pet..."
             onClear={handleClearSearch}
@@ -143,7 +124,7 @@ const LinkPetModal = ({
                 Nenhum pet encontrado
               </p>
               <p className="text-gray-500 dark:text-gray-400 text-sm">
-                {searchTerm.trim()
+                {listState.searchTerm.trim()
                   ? 'Não há pets com o nome informado.'
                   : 'Não há pets cadastrados.'}
               </p>
@@ -236,15 +217,15 @@ const LinkPetModal = ({
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page === 0}
+                onClick={() => handlePageChange(listState.page - 1)}
+                disabled={listState.page === 0}
                 className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Anterior
               </button>
               <button
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page >= pagination.pageCount - 1}
+                onClick={() => handlePageChange(listState.page + 1)}
+                disabled={listState.page >= pagination.pageCount - 1}
                 className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Próxima

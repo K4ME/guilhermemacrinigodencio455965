@@ -1,46 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { apiFacade } from '../../services/facade'
-import type { Pet } from '../../services/facade'
+import { petStore } from '../../stores'
+import { useStore } from '../../hooks/useStore'
 import { handleApiError } from '../../utils/errorHandler'
-import { ApiError } from '../../types/api.types'
 
 const PetDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [pet, setPet] = useState<Pet | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<ApiError | null>(null)
+  const detailState = useStore(petStore.detailState$)
 
   useEffect(() => {
-    const fetchPetDetails = async () => {
-      if (!id) {
-        setError({ message: 'ID do pet não fornecido' })
-        setLoading(false)
-        return
-      }
-
-      setLoading(true)
-      setError(null)
-
-      try {
-        const petData = await apiFacade.pets.getById(id)
-        setPet(petData)
-      } catch (err) {
-        setError(err as ApiError)
-      } finally {
-        setLoading(false)
-      }
+    if (id) {
+      petStore.loadPetById(id)
     }
-
-    fetchPetDetails()
   }, [id])
 
   const handleGoBack = () => {
     navigate(-1)
   }
 
-  if (loading) {
+  if (detailState.loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -51,7 +30,7 @@ const PetDetail = () => {
     )
   }
 
-  if (error) {
+  if (detailState.error) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 max-w-md">
@@ -59,7 +38,7 @@ const PetDetail = () => {
             Erro ao carregar pet
           </p>
           <p className="text-red-500 dark:text-red-300 text-sm mb-4">
-            {handleApiError(error)}
+            {handleApiError(detailState.error)}
           </p>
           <button
             onClick={handleGoBack}
@@ -72,7 +51,7 @@ const PetDetail = () => {
     )
   }
 
-  if (!pet) {
+  if (!detailState.data) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -90,6 +69,7 @@ const PetDetail = () => {
     )
   }
 
+  const pet = detailState.data
   const ageText = pet.idade !== undefined && pet.idade !== null 
     ? `${pet.idade} ${pet.idade === 1 ? 'ano' : 'anos'}` 
     : 'Idade não informada'

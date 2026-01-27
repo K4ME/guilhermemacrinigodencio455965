@@ -2,7 +2,6 @@ import { ApiError } from '../types/api.types'
 
 export const handleApiError = (error: ApiError): string => {
   if (error.errors) {
-    // Retornar primeiro erro de validação
     const firstError = Object.values(error.errors)[0]
     return Array.isArray(firstError) ? firstError[0] : firstError
   }
