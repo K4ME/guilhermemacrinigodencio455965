@@ -1,11 +1,14 @@
+import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
-import { PetList } from './components/PetList'
-import { TutorList } from './components/TutorList'
-import { PetDetail } from './pages/PetDetail'
-import { PetFormPage } from './pages/PetFormPage'
-import { TutorDetail } from './pages/TutorDetail'
-import { TutorFormPage } from './pages/TutorFormPage'
 import { useAuth } from './contexts/AuthContext'
+
+const PetList = lazy(() => import('./components/PetList').then(module => ({ default: module.PetList })))
+const PetDetail = lazy(() => import('./pages/PetDetail').then(module => ({ default: module.PetDetail })))
+const PetFormPage = lazy(() => import('./pages/PetFormPage').then(module => ({ default: module.PetFormPage })))
+
+const TutorList = lazy(() => import('./components/TutorList').then(module => ({ default: module.TutorList })))
+const TutorDetail = lazy(() => import('./pages/TutorDetail').then(module => ({ default: module.TutorDetail })))
+const TutorFormPage = lazy(() => import('./pages/TutorFormPage').then(module => ({ default: module.TutorFormPage })))
 
 const App = () => {
   const { isLoading } = useAuth()
@@ -71,17 +74,28 @@ const AppContent = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full min-w-0">
-        <Routes>
-          <Route path="/" element={<Navigate to="/pets" replace />} />
-          <Route path="/pets" element={<PetList />} />
-          <Route path="/pets/new" element={<PetFormPage />} />
-          <Route path="/pets/:id" element={<PetDetail />} />
-          <Route path="/pets/:id/edit" element={<PetFormPage />} />
-          <Route path="/tutores" element={<TutorList />} />
-          <Route path="/tutores/new" element={<TutorFormPage />} />
-          <Route path="/tutores/:id" element={<TutorDetail />} />
-          <Route path="/tutores/:id/edit" element={<TutorFormPage />} />
-        </Routes>
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-300">Carregando...</p>
+              </div>
+            </div>
+          }
+        >
+          <Routes>
+            <Route path="/" element={<Navigate to="/pets" replace />} />
+            <Route path="/pets" element={<PetList />} />
+            <Route path="/pets/new" element={<PetFormPage />} />
+            <Route path="/pets/:id" element={<PetDetail />} />
+            <Route path="/pets/:id/edit" element={<PetFormPage />} />
+            <Route path="/tutores" element={<TutorList />} />
+            <Route path="/tutores/new" element={<TutorFormPage />} />
+            <Route path="/tutores/:id" element={<TutorDetail />} />
+            <Route path="/tutores/:id/edit" element={<TutorFormPage />} />
+          </Routes>
+        </Suspense>
       </main>
     </div>
   )
