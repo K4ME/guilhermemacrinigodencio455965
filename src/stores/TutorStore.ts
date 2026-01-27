@@ -190,14 +190,20 @@ class TutorStore extends BaseStore<TutorPaginatedResponse> {
     const currentState = this._formState$.getValue()
     try {
       const photo = await apiFacade.tutors.uploadPhoto(id, file)
-      if (currentState.data?.id === id) {
+      const tutorId = typeof currentState.data?.id === 'number'
+        ? currentState.data.id.toString()
+        : currentState.data?.id
+      if (tutorId === id) {
         this._formState$.next({
           ...currentState,
           data: { ...currentState.data, foto: photo },
         })
       }
       const detailState = this._detailState$.getValue()
-      if (detailState.data?.id === id) {
+      const detailTutorId = typeof detailState.data?.id === 'number'
+        ? detailState.data.id.toString()
+        : detailState.data?.id
+      if (detailTutorId === id) {
         this._detailState$.next({
           ...detailState,
           data: { ...detailState.data, foto: photo },
@@ -216,14 +222,20 @@ class TutorStore extends BaseStore<TutorPaginatedResponse> {
     const currentState = this._formState$.getValue()
     try {
       await apiFacade.tutors.deletePhoto(id, fotoId)
-      if (currentState.data?.id === id) {
+      const tutorId = typeof currentState.data?.id === 'number'
+        ? currentState.data.id.toString()
+        : currentState.data?.id
+      if (tutorId === id) {
         this._formState$.next({
           ...currentState,
           data: { ...currentState.data, foto: null },
         })
       }
       const detailState = this._detailState$.getValue()
-      if (detailState.data?.id === id) {
+      const detailTutorId = typeof detailState.data?.id === 'number'
+        ? detailState.data.id.toString()
+        : detailState.data?.id
+      if (detailTutorId === id) {
         this._detailState$.next({
           ...detailState,
           data: { ...detailState.data, foto: null },

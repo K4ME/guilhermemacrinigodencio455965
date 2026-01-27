@@ -185,14 +185,20 @@ class PetStore extends BaseStore<PetPaginatedResponse> {
     const currentState = this._formState$.getValue()
     try {
       const photo = await apiFacade.pets.uploadPhoto(id, file)
-      if (currentState.data?.id === id) {
+      const petId = typeof currentState.data?.id === 'number'
+        ? currentState.data.id.toString()
+        : currentState.data?.id
+      if (petId === id) {
         this._formState$.next({
           ...currentState,
           data: { ...currentState.data, foto: photo },
         })
       }
       const detailState = this._detailState$.getValue()
-      if (detailState.data?.id === id) {
+      const detailPetId = typeof detailState.data?.id === 'number'
+        ? detailState.data.id.toString()
+        : detailState.data?.id
+      if (detailPetId === id) {
         this._detailState$.next({
           ...detailState,
           data: { ...detailState.data, foto: photo },
@@ -211,14 +217,20 @@ class PetStore extends BaseStore<PetPaginatedResponse> {
     const currentState = this._formState$.getValue()
     try {
       await apiFacade.pets.deletePhoto(id, fotoId)
-      if (currentState.data?.id === id) {
+      const petId = typeof currentState.data?.id === 'number' 
+        ? currentState.data.id.toString() 
+        : currentState.data?.id
+      if (petId === id) {
         this._formState$.next({
           ...currentState,
           data: { ...currentState.data, foto: null },
         })
       }
       const detailState = this._detailState$.getValue()
-      if (detailState.data?.id === id) {
+      const detailPetId = typeof detailState.data?.id === 'number'
+        ? detailState.data.id.toString()
+        : detailState.data?.id
+      if (detailPetId === id) {
         this._detailState$.next({
           ...detailState,
           data: { ...detailState.data, foto: null },

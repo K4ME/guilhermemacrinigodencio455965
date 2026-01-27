@@ -53,6 +53,7 @@ const PetFormPage = () => {
     setDeletingPhoto(true)
     try {
       await petStore.deletePhoto(id, confirmDeletePhoto.fotoId)
+      await petStore.loadPetForForm(id)
       setConfirmDeletePhoto({ isOpen: false, fotoId: null })
     } catch (error) {
       alert('Erro ao remover a foto. Tente novamente.')

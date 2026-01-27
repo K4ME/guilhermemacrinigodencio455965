@@ -7,7 +7,7 @@ interface TutorFormProps {
   onCancel: () => void
   isLoading?: boolean
   onPhotoUpload?: (file: File) => Promise<void>
-  onPhotoDelete?: (fotoId: string) => Promise<void>
+  onPhotoDelete?: (fotoId: string) => void
   isUploadingPhoto?: boolean
   isDeletingPhoto?: boolean
 }
@@ -47,7 +47,11 @@ const TutorForm = ({
         setPhotoPreview(tutor.foto.url)
       } else {
         setPhotoPreview(null)
+        setSelectedFile(null)
       }
+    } else {
+      setPhotoPreview(null)
+      setSelectedFile(null)
     }
   }, [tutor])
 

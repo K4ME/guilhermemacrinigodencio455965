@@ -52,6 +52,7 @@ const TutorFormPage = () => {
     setDeletingPhoto(true)
     try {
       await tutorStore.deletePhoto(id, confirmDeletePhoto.fotoId)
+      await tutorStore.loadTutorForForm(id)
       setConfirmDeletePhoto({ isOpen: false, fotoId: null })
     } catch (error) {
       alert('Erro ao remover a foto. Tente novamente.')
