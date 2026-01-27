@@ -24,6 +24,21 @@ npm run build
 npm run preview
 ```
 
+### Executar testes
+```bash
+npm test
+```
+
+### Executar testes com UI
+```bash
+npm run test:ui
+```
+
+### Executar testes com cobertura
+```bash
+npm run test:coverage
+```
+
 ## 📁 Estrutura do projeto
 
 ```
@@ -71,6 +86,12 @@ npm run preview
 │   │   └── api.types.ts        # Tipos e interfaces da API
 │   ├── utils/                  # Utilitários
 │   │   └── errorHandler.ts    # Utilitário para tratamento de erros
+│   ├── test/                   # Configuração e utilitários de teste
+│   │   ├── setup.ts           # Configuração inicial dos testes
+│   │   ├── utils/
+│   │   │   └── testUtils.tsx  # Utilitários para renderização
+│   │   └── mocks/
+│   │       └── apiFacade.ts    # Mocks para testes
 │   ├── App.tsx                 # Componente principal
 │   ├── main.tsx                # Ponto de entrada da aplicação
 │   ├── index.css               # Estilos globais (Tailwind directives)
@@ -139,6 +160,8 @@ const PetList = () => {
 - **React Router DOM** - Roteamento para aplicações React
 - **PostCSS** - Ferramenta para transformar CSS
 - **ESLint** - Linter para manter a qualidade do código
+- **Vitest** - Framework de testes rápido e moderno
+- **Testing Library** - Biblioteca para testar componentes React
 
 ## 📚 Conceitos Principais
 
@@ -161,3 +184,66 @@ const state = useStore(store.state$)
 ### Facade Pattern
 
 O `ApiFacade` fornece uma interface simplificada para acessar os serviços de API, ocultando a complexidade dos serviços individuais e oferecendo operações compostas.
+
+## 🧪 Testes
+
+O projeto utiliza **Vitest** para testes unitários, com suporte a:
+
+- Testes de stores (BehaviorSubject)
+- Testes de hooks customizados
+- Testes de componentes React
+- Testes de utilitários
+
+### Estrutura de Testes
+
+Os testes seguem a convenção de nomenclatura `*.test.ts` ou `*.test.tsx` e estão localizados próximos aos arquivos que testam:
+
+```
+src/
+├── stores/
+│   └── __tests__/
+│       ├── BaseStore.test.ts
+│       └── PetStore.test.ts
+├── hooks/
+│   └── __tests__/
+│       └── useStore.test.ts
+├── components/
+│   └── __tests__/
+│       └── LoadingSpinner.test.tsx
+└── utils/
+    └── __tests__/
+        └── errorHandler.test.ts
+```
+
+### Exemplo de Teste
+
+```typescript
+import { describe, it, expect, beforeEach } from 'vitest'
+import { petStore } from '../PetStore'
+
+describe('PetStore', () => {
+  beforeEach(() => {
+    // Setup antes de cada teste
+  })
+
+  it('deve carregar pets com sucesso', async () => {
+    await petStore.loadPets(0, 10)
+    expect(petStore.listState.data).toBeDefined()
+  })
+})
+```
+
+Para mais informações sobre testes, consulte:
+- [TESTES.md](TESTES.md) - Guia completo de testes unitários
+- [src/test/README.md](src/test/README.md) - Documentação técnica dos testes
+
+## 📊 Status dos Testes
+
+Execute `npm run test:run` para verificar o status atual dos testes. O projeto possui testes para:
+
+- ✅ Stores (BaseStore, PetStore)
+- ✅ Hooks customizados (useStore)
+- ✅ Componentes React (LoadingSpinner, PetCard)
+- ✅ Utilitários (errorHandler)
+
+**Cobertura atual**: Todos os testes passando (36 testes)
