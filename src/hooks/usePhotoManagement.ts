@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { PetPhoto } from '../services/api'
+import type { PetPhoto } from '../services/facade'
 import { ApiError } from '../types/api.types'
 
 interface UsePhotoManagementOptions<T> {

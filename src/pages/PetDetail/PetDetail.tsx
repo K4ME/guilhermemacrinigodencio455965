@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { petService, Pet } from '../../services/api'
+import { apiFacade } from '../../services/facade'
+import type { Pet } from '../../services/facade'
 import { handleApiError } from '../../utils/errorHandler'
 import { ApiError } from '../../types/api.types'
 
@@ -23,7 +24,7 @@ const PetDetail = () => {
       setError(null)
 
       try {
-        const petData = await petService.getById(id)
+        const petData = await apiFacade.pets.getById(id)
         setPet(petData)
       } catch (err) {
         setError(err as ApiError)

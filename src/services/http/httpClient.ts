@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
 import { env } from '../../config/env'
 import { ApiError, RequestConfig } from '../../types/api.types'
-import { LoginResponse } from '../api/authService'
+import type { LoginResponse } from '../facade'
 
 class HttpClient {
   private client: AxiosInstance

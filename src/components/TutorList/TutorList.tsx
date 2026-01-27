@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { tutorService, Tutor } from '../../services/api'
+import { apiFacade } from '../../services/facade'
+import type { Tutor } from '../../services/facade'
 import { Pagination } from '../Pagination'
 import { SearchHeader } from '../SearchHeader'
 import { ResultsInfo } from '../ResultsInfo'
@@ -14,7 +15,7 @@ const TutorList = () => {
 
   const fetchTutores = useMemo(
     () => (page: number, size: number, searchName?: string) =>
-      tutorService.getAll(page, size, searchName),
+      apiFacade.tutors.getAll(page, size, searchName),
     []
   )
 

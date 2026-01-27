@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { petService } from '../../services/api'
+import { apiFacade } from '../../services/facade'
 import { PetCard } from '../PetCard'
 import { Pagination } from '../Pagination'
 import { SearchHeader } from '../SearchHeader'
@@ -15,7 +15,7 @@ const PetList = () => {
 
   const fetchPets = useMemo(
     () => (page: number, size: number, searchName?: string) =>
-      petService.getAll(page, size, searchName),
+      apiFacade.pets.getAll(page, size, searchName),
     []
   )
 

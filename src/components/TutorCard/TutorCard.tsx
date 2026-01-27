@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Tutor } from '../../services/api'
+import type { Tutor } from '../../services/facade'
 
 interface TutorCardProps {
   tutor: Tutor

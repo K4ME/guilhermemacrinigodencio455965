@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { tutorService, CreateTutorDto, Tutor } from '../../services/api'
+import { apiFacade } from '../../services/facade'
+import type { CreateTutorDto, Tutor } from '../../services/facade'
 import { TutorForm } from '../../components/TutorForm'
 import { handleApiError } from '../../utils/errorHandler'
 import { ApiError } from '../../types/api.types'
@@ -33,8 +34,8 @@ const TutorFormPage = () => {
         })
       }
     },
-    uploadPhoto: tutorService.uploadPhoto.bind(tutorService),
-    deletePhoto: tutorService.deletePhoto.bind(tutorService),
+    uploadPhoto: apiFacade.tutors.uploadPhoto.bind(apiFacade.tutors),
+    deletePhoto: apiFacade.tutors.deletePhoto.bind(apiFacade.tutors),
     onError: (err) => setError(err),
   })
 
@@ -47,7 +48,7 @@ const TutorFormPage = () => {
         setError(null)
 
         try {
-          const tutorData = await tutorService.getById(id)
+          const tutorData = await apiFacade.tutors.getById(id)
           setTutor(tutorData)
         } catch (err) {
           setError(err as ApiError)
@@ -66,9 +67,9 @@ const TutorFormPage = () => {
 
     try {
       if (isEditMode && id) {
-        await tutorService.update(id, data)
+        await apiFacade.tutors.update(id, data)
       } else {
-        await tutorService.create(data)
+        await apiFacade.tutors.create(data)
       }
       navigate('/tutores')
     } catch (err) {

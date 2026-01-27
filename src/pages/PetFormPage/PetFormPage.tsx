@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { petService, CreatePetDto, Pet } from '../../services/api'
+import { apiFacade } from '../../services/facade'
+import type { CreatePetDto, Pet } from '../../services/facade'
 import { PetForm } from '../../components/PetForm'
 import { handleApiError } from '../../utils/errorHandler'
 import { ApiError } from '../../types/api.types'
@@ -33,8 +34,8 @@ const PetFormPage = () => {
         })
       }
     },
-    uploadPhoto: petService.uploadPhoto.bind(petService),
-    deletePhoto: petService.deletePhoto.bind(petService),
+    uploadPhoto: apiFacade.pets.uploadPhoto.bind(apiFacade.pets),
+    deletePhoto: apiFacade.pets.deletePhoto.bind(apiFacade.pets),
     onError: (err) => setError(err),
   })
 
@@ -47,7 +48,7 @@ const PetFormPage = () => {
         setError(null)
 
         try {
-          const petData = await petService.getById(id)
+          const petData = await apiFacade.pets.getById(id)
           setPet(petData)
         } catch (err) {
           setError(err as ApiError)
@@ -66,9 +67,9 @@ const PetFormPage = () => {
 
     try {
       if (isEditMode && id) {
-        await petService.update(id, data)
+        await apiFacade.pets.update(id, data)
       } else {
-        await petService.create(data)
+        await apiFacade.pets.create(data)
       }
       navigate('/pets')
     } catch (err) {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { petService, Pet, PetPaginatedResponse } from '../../services/api'
+import { apiFacade } from '../../services/facade'
+import type { Pet, PetPaginatedResponse } from '../../services/facade'
 import { SearchInput } from '../SearchInput'
 import { handleApiError } from '../../utils/errorHandler'
 import { ApiError } from '../../types/api.types'
@@ -32,7 +33,7 @@ const LinkPetModal = ({
     setError(null)
 
     try {
-      const response = await petService.getAll(currentPage, 10, searchName)
+      const response = await apiFacade.pets.getAll(currentPage, 10, searchName)
       setPets(response.content)
       setPagination(response)
     } catch (err) {

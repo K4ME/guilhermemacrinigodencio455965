@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CreateTutorDto, Tutor } from '../../services/api'
+import type { CreateTutorDto, Tutor } from '../../services/facade'
 
 interface TutorFormProps {
   tutor?: Tutor | null

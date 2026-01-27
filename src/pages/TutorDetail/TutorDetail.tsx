@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { tutorService, Tutor } from '../../services/api'
+import { apiFacade } from '../../services/facade'
+import type { Tutor } from '../../services/facade'
 import { handleApiError } from '../../utils/errorHandler'
 import { ApiError } from '../../types/api.types'
 import { LinkPetModal } from '../../components/LinkPetModal'
@@ -36,7 +37,7 @@ const TutorDetail = () => {
       setError(null)
 
       try {
-        const tutorData = await tutorService.getById(id)
+        const tutorData = await apiFacade.tutors.getById(id)
         setTutor(tutorData)
       } catch (err) {
         setError(err as ApiError)
@@ -61,9 +62,8 @@ const TutorDetail = () => {
     if (!id) return
 
     try {
-      await tutorService.linkPet(id, petId)
-      // Recarregar dados do tutor após vincular
-      const tutorData = await tutorService.getById(id)
+      await apiFacade.tutors.linkPet(id, petId)
+      const tutorData = await apiFacade.tutors.getById(id)
       setTutor(tutorData)
     } catch (err) {
       throw err
@@ -91,9 +91,8 @@ const TutorDetail = () => {
 
     setUnlinkingPetId(confirmUnlink.petId)
     try {
-      await tutorService.unlinkPet(id, confirmUnlink.petId.toString())
-      // Recarregar dados do tutor após desvincular
-      const tutorData = await tutorService.getById(id)
+      await apiFacade.tutors.unlinkPet(id, confirmUnlink.petId.toString())
+      const tutorData = await apiFacade.tutors.getById(id)
       setTutor(tutorData)
     } catch (err) {
       console.error('Erro ao desvincular pet:', err)

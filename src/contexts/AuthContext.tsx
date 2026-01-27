@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
-import { authService, LoginCredentials, LoginResponse } from '../services/api'
+import { apiFacade } from '../services/facade'
+import type { LoginCredentials, LoginResponse } from '../services/facade'
 import { httpClient } from '../services/http'
 
 interface AuthContextType {
@@ -54,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = useCallback(async (credentials: LoginCredentials) => {
     try {
-      const response = await authService.login(credentials)
+      const response = await apiFacade.auth.login(credentials)
       saveTokens(response)
     } catch (error) {
       clearTokens()
@@ -77,9 +78,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setIsAuthenticated(true)
         }
       } else {
-        // Token expirado ou não existe, fazer login automático
         try {
-          const response = await authService.login({ username: 'admin', password: 'admin' })
+          const response = await apiFacade.auth.login({ username: 'admin', password: 'admin' })
           saveTokens(response)
         } catch (error) {
           console.error('Erro ao fazer login automático:', error)
@@ -91,28 +91,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const handleRefreshSuccess = (event: CustomEvent<LoginResponse>) => {
-      // Atualizar tokens quando o httpClient fizer refresh com sucesso
       saveTokens(event.detail)
     }
 
     const handleUnauthorized = async () => {
-      // Tentar reautenticar quando receber erro 401 e refresh falhar
       try {
-        const response = await authService.login({ username: 'admin', password: 'admin' })
+        const response = await apiFacade.auth.login({ username: 'admin', password: 'admin' })
         saveTokens(response)
-        // Notificar que reautenticação foi bem-sucedida
         window.dispatchEvent(new CustomEvent('auth:reauth-success', { detail: response }))
       } catch (error) {
         console.error('Erro ao reautenticar:', error)
         clearTokens()
-        // Notificar que reautenticação falhou
         window.dispatchEvent(new CustomEvent('auth:reauth-failure'))
       }
     }
 
     initializeAuth()
     
-    // Listener para eventos de refresh bem-sucedido e não autorizado
     window.addEventListener('auth:refresh-success', handleRefreshSuccess as EventListener)
     window.addEventListener('auth:unauthorized', handleUnauthorized)
     

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { CreatePetDto, Pet } from '../../services/api'
+import type { CreatePetDto, Pet } from '../../services/facade'
 
 interface PetFormProps {
   pet?: Pet | null
