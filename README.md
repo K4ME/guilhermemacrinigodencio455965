@@ -2,6 +2,13 @@
 
 Este projeto foi criado com Vite, React e TypeScript, utilizando gerenciamento de estado reativo com BehaviorSubject (RxJS).
 
+## 🌐 Deploy (Vercel)
+
+A aplicação está em produção na **Vercel**:
+
+- **URL:** [https://guilhermemacrinigodencio455965.vercel.app](https://guilhermemacrinigodencio455965.vercel.app)
+- **Exemplo (pets):** [https://guilhermemacrinigodencio455965.vercel.app/pets](https://guilhermemacrinigodencio455965.vercel.app/pets)
+
 ## 🚀 Como executar
 
 ### Instalar dependências
