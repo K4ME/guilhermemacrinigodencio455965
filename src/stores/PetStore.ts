@@ -188,20 +188,20 @@ class PetStore extends BaseStore<PetPaginatedResponse> {
       const petId = typeof currentState.data?.id === 'number'
         ? currentState.data.id.toString()
         : currentState.data?.id
-      if (petId === id) {
+      if (petId === id && currentState.data) {
         this._formState$.next({
           ...currentState,
-          data: { ...currentState.data, foto: photo },
+          data: { ...currentState.data, foto: photo } as Pet,
         })
       }
       const detailState = this._detailState$.getValue()
       const detailPetId = typeof detailState.data?.id === 'number'
         ? detailState.data.id.toString()
         : detailState.data?.id
-      if (detailPetId === id) {
+      if (detailPetId === id && detailState.data) {
         this._detailState$.next({
           ...detailState,
-          data: { ...detailState.data, foto: photo },
+          data: { ...detailState.data, foto: photo } as Pet,
         })
       }
     } catch (error) {
@@ -220,20 +220,20 @@ class PetStore extends BaseStore<PetPaginatedResponse> {
       const petId = typeof currentState.data?.id === 'number' 
         ? currentState.data.id.toString() 
         : currentState.data?.id
-      if (petId === id) {
+      if (petId === id && currentState.data) {
         this._formState$.next({
           ...currentState,
-          data: { ...currentState.data, foto: null },
+          data: { ...currentState.data, foto: null } as Pet,
         })
       }
       const detailState = this._detailState$.getValue()
       const detailPetId = typeof detailState.data?.id === 'number'
         ? detailState.data.id.toString()
         : detailState.data?.id
-      if (detailPetId === id) {
+      if (detailPetId === id && detailState.data) {
         this._detailState$.next({
           ...detailState,
-          data: { ...detailState.data, foto: null },
+          data: { ...detailState.data, foto: null } as Pet,
         })
       }
     } catch (error) {

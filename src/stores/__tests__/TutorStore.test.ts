@@ -147,6 +147,7 @@ describe('TutorStore', () => {
 
   describe('resetFormState', () => {
     it('deve resetar o estado do formulário', async () => {
+      vi.mocked(apiFacade.tutors.getById).mockResolvedValue(mockTutor)
       await tutorStore.loadTutorForForm('1')
       tutorStore.resetFormState()
 

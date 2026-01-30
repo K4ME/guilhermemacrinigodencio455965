@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import type { PetPhoto } from '../services/facade'
 import { ApiError } from '../types/api.types'
 
-interface UsePhotoManagementOptions<T> {
+interface UsePhotoManagementOptions {
   entityId: string | undefined
   onPhotoUpdated: (photo: PetPhoto | null) => void
   uploadPhoto: (id: string, file: File) => Promise<PetPhoto>
@@ -23,13 +23,13 @@ interface UsePhotoManagementReturn {
   handleCloseConfirmDeletePhoto: () => void
 }
 
-export const usePhotoManagement = <T>({
+export const usePhotoManagement = ({
   entityId,
   onPhotoUpdated,
   uploadPhoto,
   deletePhoto,
   onError,
-}: UsePhotoManagementOptions<T>): UsePhotoManagementReturn => {
+}: UsePhotoManagementOptions): UsePhotoManagementReturn => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [deletingPhoto, setDeletingPhoto] = useState(false)
   const [confirmDeletePhoto, setConfirmDeletePhoto] = useState<{

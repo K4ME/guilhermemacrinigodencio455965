@@ -6,7 +6,6 @@ import type { CreatePetDto } from '../../services/facade'
 import { PetForm } from '../../components/PetForm'
 import { handleApiError } from '../../utils/errorHandler'
 import { PopConfirm } from '../../components/PopConfirm'
-import { usePhotoManagement } from '../../hooks/usePhotoManagement'
 
 const PetFormPage = () => {
   const { id } = useParams<{ id: string }>()

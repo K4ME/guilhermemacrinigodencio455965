@@ -82,7 +82,7 @@ export const usePaginatedList = <T>({
 
   const displayedItems = data?.content || []
   const hasSearchResults = displayedItems.length > 0
-  const showNoResults = searchTerm.trim() && !hasSearchResults && !loading
+  const showNoResults = !!(searchTerm.trim() && !hasSearchResults && !loading)
   const hasNoData = !data || !data.content || data.content.length === 0
 
   return {

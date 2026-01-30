@@ -2,13 +2,8 @@ import { vi } from 'vitest'
 import type {
   Pet,
   PetPaginatedResponse,
-  CreatePetDto,
-  UpdatePetDto,
   Tutor,
   TutorPaginatedResponse,
-  CreateTutorDto,
-  UpdateTutorDto,
-  LoginCredentials,
   LoginResponse,
 } from '../../services/facade'
 
@@ -52,6 +47,7 @@ export const mockLoginResponse: LoginResponse = {
   access_token: 'mock-token',
   refresh_token: 'mock-refresh-token',
   expires_in: 3600,
+  refresh_expires_in: 7200,
 }
 
 export const createMockApiFacade = () => ({

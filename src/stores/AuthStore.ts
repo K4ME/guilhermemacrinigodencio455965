@@ -1,5 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs'
-import { BaseStore, StoreState } from './BaseStore'
+import { BaseStore } from './BaseStore'
 import { apiFacade } from '../services/facade'
 import type { LoginCredentials, LoginResponse } from '../services/facade'
 import { httpClient } from '../services/http'

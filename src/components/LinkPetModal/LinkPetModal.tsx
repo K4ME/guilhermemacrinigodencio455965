@@ -16,7 +16,7 @@ const LinkPetModal = ({
   isOpen,
   onClose,
   onLinkPet,
-  tutorId,
+  tutorId: _tutorId,
   linkedPetIds = [],
 }: LinkPetModalProps) => {
   const listState = useStore(petStore.listState$)

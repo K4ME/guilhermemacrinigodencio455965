@@ -145,6 +145,7 @@ describe('PetStore', () => {
 
   describe('resetFormState', () => {
     it('deve resetar o estado do formulário', async () => {
+      vi.mocked(apiFacade.pets.getById).mockResolvedValue(mockPet)
       await petStore.loadPetForForm('1')
       petStore.resetFormState()
 

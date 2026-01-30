@@ -206,27 +206,27 @@ class HttpClient {
     // Disparar evento para reautenticação
     const reauthPromise = new Promise<LoginResponse>((resolve, reject) => {
       const timeout = setTimeout(() => {
-        window.removeEventListener('auth:reauth-success', handleSuccess)
-        window.removeEventListener('auth:reauth-failure', handleFailure)
+        window.removeEventListener('auth:reauth-success', successListener)
+        window.removeEventListener('auth:reauth-failure', failureListener)
         reject(new Error('Timeout aguardando reautenticação'))
       }, 10000) // 10 segundos de timeout
 
-      const handleSuccess = (event: CustomEvent<LoginResponse>) => {
+      const successListener: EventListener = (ev) => {
         clearTimeout(timeout)
-        window.removeEventListener('auth:reauth-success', handleSuccess)
-        window.removeEventListener('auth:reauth-failure', handleFailure)
-        resolve(event.detail)
+        window.removeEventListener('auth:reauth-success', successListener)
+        window.removeEventListener('auth:reauth-failure', failureListener)
+        resolve((ev as CustomEvent<LoginResponse>).detail)
       }
 
-      const handleFailure = () => {
+      const failureListener: EventListener = () => {
         clearTimeout(timeout)
-        window.removeEventListener('auth:reauth-success', handleSuccess)
-        window.removeEventListener('auth:reauth-failure', handleFailure)
+        window.removeEventListener('auth:reauth-success', successListener)
+        window.removeEventListener('auth:reauth-failure', failureListener)
         reject(new Error('Falha na reautenticação'))
       }
 
-      window.addEventListener('auth:reauth-success', handleSuccess as EventListener)
-      window.addEventListener('auth:reauth-failure', handleFailure)
+      window.addEventListener('auth:reauth-success', successListener)
+      window.addEventListener('auth:reauth-failure', failureListener)
     })
 
     window.dispatchEvent(new CustomEvent('auth:unauthorized'))

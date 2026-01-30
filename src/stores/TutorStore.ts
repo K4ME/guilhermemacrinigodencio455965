@@ -193,20 +193,20 @@ class TutorStore extends BaseStore<TutorPaginatedResponse> {
       const tutorId = typeof currentState.data?.id === 'number'
         ? currentState.data.id.toString()
         : currentState.data?.id
-      if (tutorId === id) {
+      if (tutorId === id && currentState.data) {
         this._formState$.next({
           ...currentState,
-          data: { ...currentState.data, foto: photo },
+          data: { ...currentState.data, foto: photo } as Tutor,
         })
       }
       const detailState = this._detailState$.getValue()
       const detailTutorId = typeof detailState.data?.id === 'number'
         ? detailState.data.id.toString()
         : detailState.data?.id
-      if (detailTutorId === id) {
+      if (detailTutorId === id && detailState.data) {
         this._detailState$.next({
           ...detailState,
-          data: { ...detailState.data, foto: photo },
+          data: { ...detailState.data, foto: photo } as Tutor,
         })
       }
     } catch (error) {
@@ -225,20 +225,20 @@ class TutorStore extends BaseStore<TutorPaginatedResponse> {
       const tutorId = typeof currentState.data?.id === 'number'
         ? currentState.data.id.toString()
         : currentState.data?.id
-      if (tutorId === id) {
+      if (tutorId === id && currentState.data) {
         this._formState$.next({
           ...currentState,
-          data: { ...currentState.data, foto: null },
+          data: { ...currentState.data, foto: null } as Tutor,
         })
       }
       const detailState = this._detailState$.getValue()
       const detailTutorId = typeof detailState.data?.id === 'number'
         ? detailState.data.id.toString()
         : detailState.data?.id
-      if (detailTutorId === id) {
+      if (detailTutorId === id && detailState.data) {
         this._detailState$.next({
           ...detailState,
-          data: { ...detailState.data, foto: null },
+          data: { ...detailState.data, foto: null } as Tutor,
         })
       }
     } catch (error) {
