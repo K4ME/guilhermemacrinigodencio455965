@@ -39,6 +39,40 @@ npm run test:ui
 npm run test:coverage
 ```
 
+## 🐳 Docker
+
+A aplicação pode ser empacotada em um container com todas as dependências isoladas.
+
+### Build da imagem
+```bash
+docker build -t guilhermemacrinigodencio455965 .
+```
+
+### Executar o container
+```bash
+docker run -p 3000:80 guilhermemacrinigodencio455965
+```
+
+Acesse: `http://localhost:3000`
+
+### Build com URL da API customizada
+```bash
+docker build \
+  --build-arg VITE_API_BASE_URL=https://sua-api.com \
+  -t guilhermemacrinigodencio455965 .
+```
+
+### Docker Compose
+```bash
+# Usando API padrão
+docker compose up -d
+
+# Com .env (opcional): VITE_API_BASE_URL=https://sua-api.com
+docker compose up -d
+```
+
+A aplicação sobe na porta **3000** (mapeada para 80 no container). O artefato é servido por **nginx** (Alpine) em modo produção. O build no container usa `vite build` (sem `tsc`); para checagem de tipos, execute `npm run build` localmente ou em CI.
+
 ## 📁 Estrutura do projeto
 
 ```
