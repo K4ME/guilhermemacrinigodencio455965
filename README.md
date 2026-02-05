@@ -2,7 +2,7 @@
   <img src="public/petmanager-logo.png" alt="PetManager" width="280" />
 </p>
 
-# React + TypeScript + Vite
+## Projeto Desenvolvedor Front End - React + TypeScript + Vite
 
 Este projeto foi criado com Vite, React e TypeScript, utilizando gerenciamento de estado reativo com BehaviorSubject (RxJS).
 
