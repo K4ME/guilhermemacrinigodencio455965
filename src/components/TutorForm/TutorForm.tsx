@@ -198,20 +198,23 @@ const TutorForm = ({
               className="relative cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {photoPreview ? (
-                <div className="relative">
+                <div className="relative group/photo">
                   <img
                     src={photoPreview}
-                    alt="Preview"
-                    className="w-48 h-48 object-contain rounded-lg border-2 border-gray-300 dark:border-gray-600 group-hover:border-blue-500 transition-colors"
+                    alt="Foto do tutor"
+                    className="w-48 h-48 object-contain rounded-lg border-2 border-gray-300 dark:border-gray-600 group-hover/photo:border-blue-500 transition-colors bg-gray-100 dark:bg-gray-800"
                     onError={() => {
                       setPhotoError('Não foi possível carregar a imagem')
                     }}
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all flex flex-col items-center justify-center gap-2">
-                    <span className="text-white opacity-0 group-hover:opacity-100 font-medium text-sm">
+                  <div
+                    className="absolute inset-0 rounded-lg flex flex-col items-center justify-center gap-2 pointer-events-none bg-black/0 group-hover/photo:bg-black/40 transition-colors duration-200"
+                    aria-hidden
+                  >
+                    <span className="text-white opacity-0 group-hover/photo:opacity-100 font-medium text-sm transition-opacity duration-200 drop-shadow-md">
                       Clique para trocar
                     </span>
-                    <span className="text-white opacity-0 group-hover:opacity-100 text-xs">
+                    <span className="text-white opacity-0 group-hover/photo:opacity-100 text-xs transition-opacity duration-200 drop-shadow-md">
                       JPG, PNG, GIF. Máx: 5MB
                     </span>
                   </div>
