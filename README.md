@@ -11,7 +11,6 @@ Este projeto foi criado com Vite, React e TypeScript, utilizando gerenciamento d
 A aplicação está em produção na **Vercel**:
 
 - **URL:** [https://guilhermemacrinigodencio455965.vercel.app](https://guilhermemacrinigodencio455965.vercel.app)
-- **Exemplo (pets):** [https://guilhermemacrinigodencio455965.vercel.app/pets](https://guilhermemacrinigodencio455965.vercel.app/pets)
 
 ## 🚀 Como executar
 
