@@ -54,6 +54,10 @@ class TutorService extends BaseService {
     return this.put<Tutor>(`/${id}`, data)
   }
 
+  async deleteTutor(id: string): Promise<void> {
+    await this.delete(`/${id}`)
+  }
+
   async uploadPhoto(id: string, file: File): Promise<PetPhoto> {
     const formData = new FormData()
     formData.append('foto', file)

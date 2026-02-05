@@ -1,13 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { petStore } from '../../stores'
 import { useStore } from '../../hooks/useStore'
 import { handleApiError } from '../../utils/errorHandler'
+import { PopConfirm } from '../../components/PopConfirm'
 
 const PetDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const detailState = useStore(petStore.detailState$)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -17,6 +20,29 @@ const PetDetail = () => {
 
   const handleGoBack = () => {
     navigate(-1)
+  }
+
+  const handleDeleteClick = () => {
+    setConfirmDelete(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!id) return
+    setIsDeleting(true)
+    try {
+      await petStore.deletePet(id)
+      navigate('/pets')
+    } catch (err) {
+      console.error('Erro ao excluir pet:', err)
+      alert('Erro ao excluir o pet. Tente novamente.')
+    } finally {
+      setIsDeleting(false)
+      setConfirmDelete(false)
+    }
+  }
+
+  const handleCloseConfirmDelete = () => {
+    setConfirmDelete(false)
   }
 
   if (detailState.loading) {
@@ -97,13 +123,58 @@ const PetDetail = () => {
           </svg>
           Voltar
         </button>
-        <button
-          onClick={() => navigate(`/pets/${pet.id}/edit`)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-        >
-          Editar
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate(`/pets/${pet.id}/edit`)}
+            disabled={isDeleting}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+          >
+            Editar
+          </button>
+          <button
+            onClick={handleDeleteClick}
+            disabled={isDeleting}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
+            title="Excluir pet"
+          >
+            {isDeleting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Excluindo...
+              </>
+            ) : (
+              'Excluir'
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* PopConfirm para Excluir Pet */}
+      <PopConfirm
+        isOpen={confirmDelete}
+        onClose={handleCloseConfirmDelete}
+        onConfirm={handleConfirmDelete}
+        title="Excluir pet"
+        message={`Tem certeza que deseja excluir o pet "${pet.nome}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        confirmButtonClassName="bg-red-600 hover:bg-red-700"
+        icon={
+          <svg
+            className="w-6 h-6 text-red-600 dark:text-red-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+        }
+      />
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
         <div className="p-8">

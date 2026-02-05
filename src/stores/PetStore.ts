@@ -178,6 +178,14 @@ class PetStore extends BaseStore<PetPaginatedResponse> {
 
   async deletePet(id: string): Promise<void> {
     await apiFacade.pets.delete(id)
+    const detailState = this._detailState$.getValue()
+    const currentId =
+      typeof detailState.data?.id === 'number'
+        ? detailState.data.id.toString()
+        : detailState.data?.id
+    if (currentId === id) {
+      this._detailState$.next({ data: null, loading: false, error: null })
+    }
     await this.loadPets(this.listState.page, 10, this.listState.searchTerm || undefined)
   }
 

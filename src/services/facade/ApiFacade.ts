@@ -82,6 +82,10 @@ class ApiFacade {
       return tutorService.update(id, data)
     },
 
+    delete: (id: string): Promise<void> => {
+      return tutorService.deleteTutor(id)
+    },
+
     linkPet: (tutorId: string, petId: string): Promise<void> => {
       return tutorService.linkPet(tutorId, petId)
     },
