@@ -14,23 +14,23 @@ const Header = () => {
               className="h-12 sm:h-10 md:h-12 w-auto object-contain block"
             />
           </div>
-          <nav className="flex gap-4 flex-shrink-0">
+          <nav className="flex items-center gap-6 sm:gap-8 flex-shrink-0">
             <Link
               to="/pets"
-              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              className={`relative py-2 text-sm font-medium transition-colors whitespace-nowrap border-b-2 border-transparent hover:text-gray-900 dark:hover:text-white ${
                 location.pathname.startsWith('/pets')
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               Pets
             </Link>
             <Link
               to="/tutores"
-              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              className={`relative py-2 text-sm font-medium transition-colors whitespace-nowrap border-b-2 border-transparent hover:text-gray-900 dark:hover:text-white ${
                 location.pathname.startsWith('/tutores')
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               Tutores

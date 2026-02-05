@@ -52,13 +52,6 @@ class HttpClient {
           delete config.headers['Content-Type']
         }
 
-        // Log de requisições em desenvolvimento
-        if (import.meta.env.DEV) {
-          console.log(`[HTTP Request] ${config.method?.toUpperCase()} ${config.url}`, {
-            params: config.params,
-            data: config.data,
-          })
-        }
 
         return config
       },
@@ -70,14 +63,6 @@ class HttpClient {
     // Response interceptor
     this.client.interceptors.response.use(
       (response) => {
-        // Log de respostas em desenvolvimento
-        if (import.meta.env.DEV) {
-          console.log(`[HTTP Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-            status: response.status,
-            data: response.data,
-          })
-        }
-
         return response
       },
       async (error: AxiosError) => {
