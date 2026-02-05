@@ -146,14 +146,14 @@ const LinkPetModal = ({
                         <img
                           src={pet.foto.url}
                           alt={pet.nome}
-                          className="w-16 h-16 rounded-lg object-cover"
+                          className="w-16 h-16 rounded-full object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement
                             target.style.display = 'none'
                           }}
                         />
                       ) : (
-                        <div className="w-16 h-16 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                           <svg
                             className="w-8 h-8 text-gray-400 dark:text-gray-500"
                             fill="none"

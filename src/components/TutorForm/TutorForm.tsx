@@ -198,17 +198,17 @@ const TutorForm = ({
               className="relative cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {photoPreview ? (
-                <div className="relative group/photo">
+                <div className="relative w-48 h-48 group/photo">
                   <img
                     src={photoPreview}
                     alt="Foto do tutor"
-                    className="w-48 h-48 object-contain rounded-lg border-2 border-gray-300 dark:border-gray-600 group-hover/photo:border-blue-500 transition-colors bg-gray-100 dark:bg-gray-800"
+                    className="w-48 h-48 object-cover rounded-full border-2 border-gray-300 dark:border-gray-600 group-hover/photo:border-blue-500 transition-colors bg-gray-100 dark:bg-gray-800"
                     onError={() => {
                       setPhotoError('Não foi possível carregar a imagem')
                     }}
                   />
                   <div
-                    className="absolute inset-0 rounded-lg flex flex-col items-center justify-center gap-2 pointer-events-none bg-black/0 group-hover/photo:bg-black/40 transition-colors duration-200"
+                    className="absolute inset-0 rounded-full flex flex-col items-center justify-center gap-2 pointer-events-none bg-black/0 group-hover/photo:bg-black/40 transition-colors duration-200"
                     aria-hidden
                   >
                     <span className="text-white opacity-0 group-hover/photo:opacity-100 font-medium text-sm transition-opacity duration-200 drop-shadow-md">
@@ -220,7 +220,7 @@ const TutorForm = ({
                   </div>
                 </div>
               ) : (
-                <div className="w-48 h-48 bg-gray-200 dark:bg-gray-700 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 group-hover:border-blue-500 transition-colors flex items-center justify-center">
+                <div className="w-48 h-48 bg-gray-200 dark:bg-gray-700 rounded-full border-2 border-dashed border-gray-300 dark:border-gray-600 group-hover:border-blue-500 transition-colors flex items-center justify-center">
                   <div className="text-center">
                     <svg
                       className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-2"

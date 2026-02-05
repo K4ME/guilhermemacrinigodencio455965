@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { tutorStore } from '../../stores'
 import { useStore } from '../../hooks/useStore'
 import { handleApiError } from '../../utils/errorHandler'
+import { getPhotoDisplayUrl } from '../../utils/photoUtils'
 import { LinkPetModal } from '../../components/LinkPetModal'
 import { PopConfirm } from '../../components/PopConfirm'
 
@@ -187,11 +188,11 @@ const TutorDetail = () => {
             {/* Foto do Tutor - Lateral Esquerda */}
             <div className="flex-shrink-0">
               {tutor.foto?.url ? (
-                <div className="w-48 h-48 md:w-56 md:h-56 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden flex items-center justify-center">
+                <div className="w-48 h-48 md:w-56 md:h-56 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-600">
                   <img
                     src={tutor.foto.url}
                     alt={tutor.nome}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement
                       target.style.display = 'none'
@@ -199,7 +200,7 @@ const TutorDetail = () => {
                   />
                 </div>
               ) : (
-                <div className="w-48 h-48 md:w-56 md:h-56 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                <div className="w-48 h-48 md:w-56 md:h-56 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-600">
                   <div className="w-32 h-32 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
                     <span className="text-gray-600 dark:text-gray-400 text-4xl font-semibold">
                       {tutor.nome.charAt(0).toUpperCase()}
@@ -276,9 +277,9 @@ const TutorDetail = () => {
                         >
                           <div className="flex items-start gap-4">
                             {pet.foto?.url ? (
-                              <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0">
+                              <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600">
                                 <img
-                                  src={pet.foto.url}
+                                  src={getPhotoDisplayUrl(pet.foto.url)}
                                   alt={pet.nome}
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
@@ -288,9 +289,9 @@ const TutorDetail = () => {
                                 />
                               </div>
                             ) : (
-                              <div className="w-20 h-20 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                              <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600">
                                 <svg
-                                  className="w-10 h-10 text-gray-400 dark:text-gray-500"
+                                  className="w-8 h-8 text-gray-400 dark:text-gray-500"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"

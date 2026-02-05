@@ -112,11 +112,11 @@ const PetDetail = () => {
             {/* Foto do Pet - Lateral Esquerda */}
             <div className="flex-shrink-0">
               {pet.foto?.url ? (
-                <div className="w-48 h-48 md:w-56 md:h-56 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden flex items-center justify-center">
+                <div className="w-48 h-48 md:w-56 md:h-56 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-600">
                   <img
                     src={pet.foto.url}
                     alt={pet.nome}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement
                       target.style.display = 'none'
@@ -124,7 +124,7 @@ const PetDetail = () => {
                   />
                 </div>
               ) : (
-                <div className="w-48 h-48 md:w-56 md:h-56 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                <div className="w-48 h-48 md:w-56 md:h-56 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-600">
                   <svg
                     className="w-16 h-16 text-gray-400 dark:text-gray-500"
                     fill="none"

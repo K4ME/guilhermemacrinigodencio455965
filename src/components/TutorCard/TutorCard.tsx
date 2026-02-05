@@ -33,16 +33,18 @@ const TutorCard = ({ tutor }: TutorCardProps) => {
       aria-label={`Ver detalhes de ${tutor.nome}`}
     >
       {imageUrl && (
-        <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
-          <img
-            src={imageUrl}
-            alt={tutor.nome}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement
-              target.style.display = 'none'
-            }}
-          />
+        <div className="flex justify-center pt-6 pb-2">
+          <div className="w-28 h-28 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 ring-2 ring-gray-200 dark:ring-gray-600 flex-shrink-0">
+            <img
+              src={imageUrl}
+              alt={tutor.nome}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement
+                target.style.display = 'none'
+              }}
+            />
+          </div>
         </div>
       )}
       <div className="p-4">
