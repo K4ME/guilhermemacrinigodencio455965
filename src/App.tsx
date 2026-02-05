@@ -1,5 +1,6 @@
 import { BrowserRouter } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import { LoadingSpinner } from './components/LoadingSpinner'
 import { Header } from './components/Header'
 import { AppRoutes } from './routes/AppRoutes'
@@ -13,7 +14,9 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <AppContent />
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

@@ -3,6 +3,7 @@ import { render, RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { vi } from 'vitest'
 import { AuthProvider } from '../../contexts/AuthContext'
+import { ThemeProvider } from '../../contexts/ThemeContext'
 
 vi.mock('../../stores', async () => {
   const { BehaviorSubject } = await import('rxjs')
@@ -28,7 +29,9 @@ vi.mock('../../stores', async () => {
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <BrowserRouter>
-      <AuthProvider>{children}</AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>{children}</AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }
