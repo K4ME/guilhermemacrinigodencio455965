@@ -155,33 +155,6 @@ O projeto utiliza **BehaviorSubject** do RxJS para gerenciamento de estado reati
 - **Estado de detalhe**: dados do item selecionado
 - **Estado de formulário**: dados do formulário em edição/criação
 
-#### Exemplo de uso de um Store
-
-```typescript
-import { petStore } from '../stores'
-import { useStore } from '../hooks/useStore'
-
-const PetList = () => {
-  const listState = useStore(petStore.listState$)
-
-  useEffect(() => {
-    petStore.loadPets(listState.page, 10, listState.searchTerm || undefined)
-  }, [listState.page, listState.searchTerm])
-
-  const handlePageChange = (newPage: number) => {
-    petStore.setPage(newPage)
-  }
-
-  return (
-    <div>
-      {listState.loading && <LoadingSpinner />}
-      {listState.data?.content.map(pet => (
-        <PetCard key={pet.id} pet={pet} />
-      ))}
-    </div>
-  )
-}
-```
 
 ### Padrões Arquiteturais
 
@@ -256,27 +229,6 @@ src/
         └── errorHandler.test.ts
 ```
 
-### Exemplo de Teste
-
-```typescript
-import { describe, it, expect, beforeEach } from 'vitest'
-import { petStore } from '../PetStore'
-
-describe('PetStore', () => {
-  beforeEach(() => {
-    // Setup antes de cada teste
-  })
-
-  it('deve carregar pets com sucesso', async () => {
-    await petStore.loadPets(0, 10)
-    expect(petStore.listState.data).toBeDefined()
-  })
-})
-```
-
-Para mais informações sobre testes, consulte:
-- [TESTES.md](TESTES.md) - Guia completo de testes unitários
-- [src/test/README.md](src/test/README.md) - Documentação técnica dos testes
 
 ## 📊 Status dos Testes
 
